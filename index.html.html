@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/adity/Downloads/water-monitor%20(1)%20(1).html -->
+<html lang="en" data-theme="dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Water Quality Monitor - Prototype</title>
+<style>
+:root{--bg:#eef3f1;--panel:#fff;--ink:#12302b;--mute:#5b7671;--line:#d3dfdc;--ok:#1f8a5b;--warn:#c98a00;--bad:#c23b32;--accent:#0d6b7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a19;--panel:#15272500;--panel:#152725;--ink:#e3f0ed;--mute:#8fb0aa;--line:#26403c;--ok:#3fc08a;--warn:#e7b43a;--bad:#ef6b62;--accent:#4fc3d4}}
+:root[data-theme="dark"]{--bg:#0e1a19;--panel:#152725;--ink:#e3f0ed;--mute:#8fb0aa;--line:#26403c;--ok:#3fc08a;--warn:#e7b43a;--bad:#ef6b62;--accent:#4fc3d4}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 16px;max-width:60ch}
+.banner{border:1px dashed var(--warn);color:var(--ink);padding:8px 12px;border-radius:6px;font-size:.85rem;margin-bottom:16px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+select,button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+button{cursor:pointer}button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.overall{margin-left:auto;font-weight:700;padding:8px 14px;border-radius:6px;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-left-width:6px;border-radius:6px;padding:12px 14px;cursor:pointer;text-align:left;width:100%;display:block}
+.card.sel{outline:2px solid var(--accent)}
+.card .n{color:var(--mute);font-size:.85rem}
+.card .v{font-size:1.9rem;font-weight:700}.card .v small{font-size:.9rem;font-weight:400;color:var(--mute)}
+.card .r{font-size:.8rem;color:var(--mute)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:16px}
+.panel h2{font-size:1rem;margin:0 0 8px}
+svg{width:100%;height:auto;display:block}
+#log{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto;font-size:.9rem}
+#log li{padding:6px 0;border-bottom:1px solid var(--line)}
+.ok{border-left-color:var(--ok)}.warn{border-left-color:var(--warn)}.bad{border-left-color:var(--bad)}
+.t-ok{color:var(--ok)}.t-warn{color:var(--warn)}.t-bad{color:var(--bad)}
+footer{color:var(--mute);font-size:.8rem}
+
+/* ---- Background ---- */
+html{background:var(--bg)}body{background:transparent}main{position:relative}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:radial-gradient(900px 500px at 12% 8%,rgba(79,195,212,.45),transparent 60%),radial-gradient(800px 500px at 92% 12%,rgba(255,226,140,.35),transparent 60%),linear-gradient(180deg,#d6edf3 0%,#eaf4f1 50%,#b4dbe0 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bg{background:radial-gradient(800px 500px at 10% 5%,rgba(31,138,160,.35),transparent 60%),radial-gradient(700px 500px at 95% 10%,rgba(30,120,80,.25),transparent 60%),linear-gradient(180deg,#071312,#0b1a19 55%,#0c2a2c)}}
+.wave{position:absolute;left:0;bottom:0;width:200%;height:150px;background-size:50% 100%;background-repeat:repeat-x;animation:wv 20s linear infinite}
+.wave.w1{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q150 0 300 60 T600 60 T900 60 T1200 60 V120 H0Z' fill='rgba(13,107,122,.22)'/%3E%3C/svg%3E")}
+.wave.w2{height:110px;animation-duration:32s;animation-direction:reverse;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 50 Q200 110 400 50 T800 50 T1200 50 V120 H0Z' fill='rgba(122,106,60,.18)'/%3E%3C/svg%3E")}
+@keyframes wv{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.wave{animation:none}}
+/* ---- Explainer video ---- */
+#vid text{font-family:inherit}
+#vid [data-min]{transition:opacity .6s}
+#river{transition:fill 1.2s}
+.drop{animation:fall 1.4s linear infinite}
+@keyframes fall{from{transform:translateY(0);opacity:1}to{transform:translateY(38px);opacity:0}}
+.smoke{animation:rise 3s linear infinite}
+@keyframes rise{from{transform:translateY(0);opacity:.7}to{transform:translateY(-35px);opacity:0}}
+.cap{margin:8px 0;font-weight:600}
+.vc{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dots span{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--line);margin-right:4px}
+.dots span.on{background:var(--accent)}
+#rv{width:100%;margin-top:10px;border-radius:6px}
+
+.scene{position:absolute;left:0;bottom:0;width:100%;height:42vh;min-height:220px;pointer-events:none}
+.sway{transform-box:fill-box;transform-origin:bottom center;animation:sw 4s ease-in-out infinite alternate}
+.sway:nth-child(2n){animation-duration:5s;animation-delay:-1.5s}
+@keyframes sw{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.sway{animation:none}}
+
+/* ---- Advanced look ---- */
+.panel,.card{background:color-mix(in srgb,var(--panel) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(10,50,55,.10)}
+.card{transition:transform .2s,box-shadow .2s}.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,50,55,.18)}
+.hero{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#1f8a5b);display:grid;place-items:center;color:#fff;font-size:26px}
+.hero h1{background:linear-gradient(90deg,var(--accent),#1f8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0}
+.team{color:var(--mute);font-size:.85rem;margin:0}
+.live{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:.85rem;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 80%,transparent)}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--bad);animation:pl 1.4s infinite}
+@keyframes pl{50%{opacity:.25;transform:scale(1.5)}}
+.top{display:grid;grid-template-columns:230px 1fr;gap:12px;margin-bottom:16px}
+.top .grid{margin:0}
+.gauge{text-align:center;margin:0;color:var(--ink)}.gauge svg{max-width:150px;margin:0 auto}
+.gauge small{color:var(--mute);display:block}.gauge b{font-size:1.1rem}
+#wr{transition:stroke-dasharray .8s,stroke .8s}
+.spark{width:100%;height:28px;margin-top:6px}
+.polluted .bg{filter:sepia(.75) saturate(.8) hue-rotate(-15deg) brightness(.9)}
+.bg{transition:filter 1.5s}
+@media(max-width:640px){.top{grid-template-columns:1fr}}
+
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.ins li{margin:6px 0}.ins ul{margin:0;padding-left:18px}
+.chk{display:flex;gap:6px;align-items:center;font-size:.9rem}
+
+/* ---- Sidebar ---- */
+#side{position:fixed;right:0;top:0;bottom:0;width:300px;max-width:88vw;z-index:20;overflow-y:auto;padding:calc(56px + env(safe-area-inset-top,0px)) 14px 20px;background:color-mix(in srgb,var(--panel) 92%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .3s;font-size:.88rem}
+body.sb #side{transform:none}
+#tg{position:fixed;right:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:30;background:var(--accent);color:#fff;border-color:var(--accent)}
+#side h2{font-size:1.05rem;margin:0 0 6px}
+#side input{width:100%;margin:6px 0 10px}
+#side details{border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin-bottom:8px;background:color-mix(in srgb,var(--panel) 70%,transparent)}
+#side summary{cursor:pointer;font-weight:700}
+#side details details{margin:6px 0 0}
+#side p,#side ul{margin:6px 0}#side ul{padding-left:18px}
+#side .note{color:var(--mute);font-size:.78rem}
+main{padding-top:56px}
+.bg::after{content:"";position:absolute;inset:0;background:#000;opacity:0;transition:opacity .5s}
+body.sb .bg::after{opacity:1}
+body.sb{--ink:#e3f0ed;--mute:#8fb0aa;--panel:#152725;--line:#26403c;--ok:#3fc08a;--warn:#e7b43a;--bad:#ef6b62;--accent:#4fc3d4}
+html:has(body.sb){background:#000}
+@media(min-width:800px){body.sb main{margin-right:316px;margin-left:16px;max-width:none}}
+@media(max-width:799px){body.sb #side{box-shadow:0 0 40px rgba(0,0,0,.35)}}
+
+#vid2 [data-on]{transition:opacity .6s}#river2{transition:fill 1.2s}
+.swim{animation:sm 3s ease-in-out infinite alternate}@keyframes sm{from{transform:translateX(-25px)}to{transform:translateX(25px)}}
+#v2s{flex:1;min-width:140px;accent-color:var(--accent)}
+
+#side{width:360px}@media(min-width:800px){body.sb main{margin-right:376px}}
+:root[data-theme="dark"] .bg{background:radial-gradient(800px 500px at 10% 5%,rgba(31,138,160,.35),transparent 60%),radial-gradient(700px 500px at 95% 10%,rgba(30,120,80,.25),transparent 60%),linear-gradient(180deg,#071312,#0b1a19 55%,#0c2a2c)}
+.vh{display:flex;justify-content:space-between;align-items:center;margin:8px 0}.vh b{font-size:1rem}
+.player{position:relative;border-radius:12px;overflow:hidden;background:#0b1615;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.player svg{display:block}
+.chip{position:absolute;top:8px;left:8px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:99px;color:#fff;letter-spacing:.08em}
+.chip.e{background:var(--bad)}.chip.s{background:var(--ok)}
+.sub2{position:absolute;left:8px;right:8px;bottom:56px;background:rgba(0,0,0,.65);color:#fff;font-size:.78rem;padding:6px 9px;border-radius:6px}
+.ctl{display:flex;align-items:center;gap:6px;padding:8px;background:#0f1f1d;flex-wrap:wrap}
+.ctl button,.ctl select{padding:4px 8px;font-size:.8rem;background:#1b3532;color:#e3f0ed;border:1px solid #2c4a46;border-radius:6px}
+.segs{display:flex;gap:3px;flex:1 1 100%;order:-1}.seg{flex:1;height:6px;background:#2c4a46;border-radius:3px;cursor:pointer;overflow:hidden}.seg i{display:block;height:100%;width:0;background:var(--accent)}
+.tm{color:#8fb0aa;font-size:.75rem;margin-left:auto}
+.rip{transform-box:fill-box;transform-origin:center;animation:rp 3s ease-out infinite}@keyframes rp{from{transform:scale(.5);opacity:.9}to{transform:scale(1.4);opacity:0}}
+.cl{animation:cd 40s linear infinite alternate}@keyframes cd{to{transform:translateX(300px)}}
+.player:fullscreen svg{width:100%;height:calc(100vh - 80px)}
+@media (prefers-reduced-motion:reduce){.rip,.cl,.swim{animation:none}}
+#ts{position:fixed;left:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:30;width:76px;height:38px;padding:0;border-radius:99px;background:var(--panel);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.2);cursor:pointer}
+#ts .ic{position:absolute;top:50%;transform:translateY(-50%);font-size:1.05rem;z-index:2;line-height:1}
+#ts .ic.s{left:9px}#ts .ic.m{right:9px}
+#ts .knob{position:absolute;top:3px;left:3px;width:30px;height:30px;border-radius:50%;background:var(--accent);transition:transform .3s;z-index:1}
+:root[data-theme="dark"] #ts .knob{transform:translateX(38px)}
+
+.logo{width:64px;height:76px;background:none;border-radius:0;perspective:300px;display:block}
+.logo svg{display:block;filter:drop-shadow(0 8px 6px rgba(0,60,90,.35));animation:flt 4s ease-in-out infinite;transition:transform .4s;transform-style:preserve-3d}
+.logo:hover svg{transform:rotateY(28deg) rotateX(10deg) scale(1.06)}
+@keyframes flt{50%{translate:0 -5px}}
+.bub{position:absolute;bottom:-30px;border-radius:50%;border:1px solid rgba(255,255,255,.7);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(255,255,255,.08));animation:bu linear infinite}
+@keyframes bu{from{transform:translate(0,0)}50%{transform:translate(18px,-55vh)}to{transform:translate(-12px,-115vh)}}
+.ray{position:absolute;top:-20%;left:8%;width:38%;height:140%;background:linear-gradient(100deg,transparent,rgba(255,250,210,.28),transparent);transform:rotate(18deg);animation:ry 10s ease-in-out infinite alternate;filter:blur(8px)}
+@keyframes ry{from{opacity:.25;transform:rotate(15deg)}to{opacity:.7;transform:rotate(22deg)}}
+@media (prefers-reduced-motion:reduce){.logo svg,.bub,.ray{animation:none}}
+
+.qh{display:flex;justify-content:space-between;font-weight:700;margin-top:6px}
+.qbar{height:6px;background:var(--line);border-radius:3px;margin:6px 0}.qbar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.qq{font-weight:700;font-size:.95rem}
+.qo{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 10px;transition:background .2s}
+.qo:disabled{opacity:1;cursor:default;color:var(--ink)}
+.qo.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.qo.no{background:var(--bad);border-color:var(--bad);color:#fff;animation:shk .3s}
+@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.qf{font-size:.82rem}
+#qn{width:100%;background:var(--accent);color:#fff;border-color:var(--accent);margin-top:6px}
+.qres{text-align:center}.qres .em{font-size:3rem;line-height:1.1}.qres .sc{font-size:2.2rem;font-weight:700}.stars{font-size:1.5rem;color:#e3a91b;letter-spacing:3px}
+
+.qp{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.qp .pb{width:28px;height:28px;padding:0;border-radius:50%;font-size:.75rem}
+.pb.ok{background:var(--ok);border-color:var(--ok);color:#fff}.pb.no{background:var(--bad);border-color:var(--bad);color:#fff}.pb.cur{outline:2px solid var(--accent);outline-offset:2px}
+.qnav{display:flex;gap:8px;margin-top:8px}.qnav button{flex:1}
+.qnav .pri{background:var(--accent);color:#fff;border-color:var(--accent)}.qnav button:disabled{opacity:.4;cursor:default}
+#side a{color:var(--accent)}
+.chip.a{background:var(--accent)}
+.sub2 b{display:block;font-size:.8rem;color:#9ff3ff}
+.sig{animation:pu 1.6s ease-in-out infinite}@keyframes pu{50%{opacity:.2}}
+.pkt{animation:pk 1.8s linear infinite}@keyframes pk{from{transform:translate(0,0);opacity:1}to{transform:translate(50px,-75px);opacity:0}}
+.sew{animation:fall 1.4s linear infinite}
+
+.links{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.links a{font-size:.74rem;border:1px solid var(--line);padding:3px 9px;border-radius:99px;text-decoration:none;color:var(--accent)}
+.links a:hover{background:var(--accent);color:#fff}
+.sub2{position:static!important;margin:0!important;border-radius:0!important;min-height:78px;background:#0b1615!important;border-top:1px solid #2c4a46;padding:8px 10px!important}
+.sub2 b{display:block;font-size:.66rem;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:2px}
+.w{opacity:0;animation:wi .4s forwards}@keyframes wi{to{opacity:1}}
+.brd{animation:fly 9s linear infinite}@keyframes fly{from{transform:translateX(-60px)}to{transform:translateX(760px)}}
+@media (prefers-reduced-motion:reduce){.brd,.w{animation:none;opacity:1}}
+
+.chip.i{background:var(--accent)}.chip.m{background:#c98a00}
+#vid [data-sc]{transition:opacity .6s}#river{transition:fill 1.2s}
+.ebob{animation:ebob 2.6s ease-in-out infinite}@keyframes ebob{50%{transform:translateY(5px)}}
+.esg{opacity:0;animation:esg 1.6s ease-out infinite}@keyframes esg{30%{opacity:1}100%{opacity:0}}
+.edr{stroke-dasharray:420;stroke-dashoffset:420;animation:edr 4s ease-out infinite}@keyframes edr{to{stroke-dashoffset:0}}
+.esp{transform-box:fill-box;transform-origin:center bottom;animation:esp 4s linear infinite}@keyframes esp{to{transform:rotate(360deg)}}
+.ebk{animation:ebk 1s steps(2) infinite}@keyframes ebk{50%{opacity:.25}}
+.edsh{stroke-dasharray:5 4;animation:edh 1s linear infinite}@keyframes edh{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion:reduce){.ebob,.esg,.edr,.esp,.ebk,.edsh{animation:none}.esg{opacity:1}.edr{stroke-dashoffset:0}}
+</style>
+</head>
+<body class="">
+<div class="bg"><div class="ray"></div><svg class="scene" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path d="M0 300V190Q200 110 420 180T800 170T1200 150V300Z" fill="rgba(76,150,80,.28)"></path><path d="M0 300V235Q300 165 600 235T1200 215V300Z" fill="rgba(46,125,50,.30)"></path><path d="M480 300C540 250 600 230 690 205C740 192 780 182 810 176L822 181C790 192 760 205 730 222C680 250 700 280 720 300Z" fill="rgba(58,159,184,.42)"></path></svg>
+<div class="wave w2"></div><div class="wave w1"></div><svg class="scene" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<g><rect x="40" y="225" width="11" height="75" fill="rgba(92,64,38,.75)"></rect><circle cx="45" cy="205" r="40" fill="rgba(34,110,52,.62)"></circle><circle cx="20" cy="230" r="27" fill="rgba(46,125,50,.6)"></circle><circle cx="72" cy="230" r="27" fill="rgba(46,125,50,.6)"></circle></g>
+<g><rect x="125" y="255" width="8" height="45" fill="rgba(92,64,38,.75)"></rect><circle cx="129" cy="240" r="26" fill="rgba(60,140,70,.6)"></circle></g>
+<g><rect x="1120" y="220" width="11" height="80" fill="rgba(92,64,38,.75)"></rect><circle cx="1125" cy="200" r="42" fill="rgba(34,110,52,.62)"></circle><circle cx="1098" cy="228" r="28" fill="rgba(46,125,50,.6)"></circle><circle cx="1152" cy="228" r="28" fill="rgba(46,125,50,.6)"></circle></g>
+<g><rect x="1050" y="258" width="8" height="42" fill="rgba(92,64,38,.75)"></rect><circle cx="1054" cy="243" r="24" fill="rgba(60,140,70,.6)"></circle></g>
+<g stroke="rgba(40,120,60,.7)" stroke-width="4" stroke-linecap="round" fill="none">
+<path class="sway" d="M215 300Q210 265 204 235"></path><path class="sway" d="M235 300Q238 262 246 230"></path><path class="sway" d="M255 300Q252 270 258 245"></path>
+<path class="sway" d="M930 300Q926 268 920 240"></path><path class="sway" d="M950 300Q954 262 962 232"></path><path class="sway" d="M972 300Q968 272 974 248"></path></g>
+</svg>
+<span class="bub" style="width: 13.1682px; height: 13.1682px; left: 98.3148%; animation-duration: 24.5353s; animation-delay: -13.7536s;"></span><span class="bub" style="width: 11.8269px; height: 11.8269px; left: 46.2228%; animation-duration: 25.3008s; animation-delay: -6.74949s;"></span><span class="bub" style="width: 16.2459px; height: 16.2459px; left: 71.8849%; animation-duration: 21.0906s; animation-delay: -0.0639983s;"></span><span class="bub" style="width: 18.7165px; height: 18.7165px; left: 87.1402%; animation-duration: 25.2657s; animation-delay: -19.5246s;"></span><span class="bub" style="width: 8.56643px; height: 8.56643px; left: 9.83861%; animation-duration: 22.5668s; animation-delay: -17.0159s;"></span><span class="bub" style="width: 19.4908px; height: 19.4908px; left: 50.2168%; animation-duration: 19.6493s; animation-delay: -7.43717s;"></span><span class="bub" style="width: 12.6136px; height: 12.6136px; left: 41.2824%; animation-duration: 27.1364s; animation-delay: -10.1666s;"></span><span class="bub" style="width: 10.0052px; height: 10.0052px; left: 40.5183%; animation-duration: 22.3677s; animation-delay: -4.40014s;"></span><span class="bub" style="width: 9.42492px; height: 9.42492px; left: 72.9894%; animation-duration: 23.327s; animation-delay: -7.50739s;"></span><span class="bub" style="width: 20.7014px; height: 20.7014px; left: 28.8385%; animation-duration: 26.1491s; animation-delay: -7.15823s;"></span><span class="bub" style="width: 7.23079px; height: 7.23079px; left: 51.7032%; animation-duration: 16.16s; animation-delay: -1.30764s;"></span><span class="bub" style="width: 10.7406px; height: 10.7406px; left: 88.9318%; animation-duration: 16.3264s; animation-delay: -5.0288s;"></span><span class="bub" style="width: 6.62034px; height: 6.62034px; left: 37.2828%; animation-duration: 21.006s; animation-delay: -9.84604s;"></span><span class="bub" style="width: 11.3313px; height: 11.3313px; left: 34.7393%; animation-duration: 23.7196s; animation-delay: -0.119185s;"></span><span class="bub" style="width: 13.9331px; height: 13.9331px; left: 83.0416%; animation-duration: 24.7988s; animation-delay: -17.5571s;"></span><span class="bub" style="width: 12.1693px; height: 12.1693px; left: 3.59468%; animation-duration: 12.485s; animation-delay: -13.176s;"></span></div>
+<button id="ts" role="switch" aria-checked="true" aria-label="Switch between light and night mode" title="Light / Night mode"><span class="knob"></span><span class="ic s">☀️</span><span class="ic m">🌙</span></button>
+<button id="tg" aria-controls="side">☰ Topic guide</button>
+<aside id="side" aria-label="Topic guide">
+<h2>Topic guide: Water pollution monitoring</h2>
+<p class="note">Short qualitative summary for this project. Add exact figures from official reports (CPCB, Ministry of Jal Shakti) in your own report.</p>
+<input id="sq" type="search" placeholder="Search topics (e.g. oxygen, IoT)" aria-label="Search topics">
+<div class="vh"><b>Video: water pollution explained</b><button id="v2h">Hide video</button></div>
+<div id="v2body"><div class="player" id="pl"><svg id="vid2" viewBox="0 0 700 260" role="img" aria-label="Animated video about water pollution, its effects, monitoring and solutions"><rect width="700" height="260" fill="#cfe6ec"></rect><circle cx="620" cy="50" r="26" fill="#ffd45e" opacity=".9"></circle><g class="cl" fill="#fff" opacity=".8"><ellipse cx="150" cy="45" rx="44" ry="14"></ellipse><ellipse cx="180" cy="38" rx="30" ry="12"></ellipse></g><rect id="river2" y="170" width="700" height="90" fill="#7a6a3c"></rect><g stroke="#fff" fill="none" opacity=".5"><ellipse class="rip" cx="120" cy="200" rx="40" ry="5"></ellipse><ellipse class="rip" cx="400" cy="225" rx="50" ry="6" style="animation-delay:1.2s"></ellipse><ellipse class="rip" cx="600" cy="205" rx="40" ry="5" style="animation-delay:2.2s"></ellipse></g><g data-on="0" style="opacity: 0;"><text x="350" y="115" text-anchor="middle" font-size="24" font-weight="700" fill="#0a4a7a">Water pollution in India</text><text x="350" y="140" text-anchor="middle" font-size="13" fill="#2a5560">Causes, effects, monitoring and solutions</text></g><g data-on="1" style="opacity: 0;"><rect x="40" y="100" width="120" height="70" fill="#5b6b70"></rect><rect x="60" y="70" width="16" height="32" fill="#4a575b"></rect><rect x="110" y="70" width="16" height="32" fill="#4a575b"></rect><circle class="smoke" cx="68" cy="66" r="9" fill="#888"></circle><circle class="smoke" cx="118" cy="66" r="9" fill="#888" style="animation-delay:1.2s"></circle><rect x="150" y="150" width="75" height="10" fill="#444"></rect><circle class="drop" cx="222" cy="164" r="4" fill="#6b4f1d"></circle><circle class="drop" cx="222" cy="164" r="4" fill="#6b4f1d" style="animation-delay:.6s"></circle><rect x="330" y="158" width="60" height="10" fill="#444"></rect><circle class="sew" cx="386" cy="168" r="4" fill="#8a6a2a"></circle><circle class="sew" cx="386" cy="168" r="4" fill="#8a6a2a" style="animation-delay:.7s"></circle><rect x="500" y="146" width="200" height="24" fill="#6a9a3a"></rect><circle class="drop" cx="540" cy="168" r="3" fill="#7a5a2a"></circle><circle class="drop" cx="600" cy="168" r="3" fill="#7a5a2a" style="animation-delay:.5s"></circle><text x="80" y="195" fill="#fff" font-size="12">Industry</text><text x="330" y="195" fill="#fff" font-size="12">Sewage drain</text><text x="540" y="195" fill="#fff" font-size="12">Farm runoff</text></g><g data-on="2 3" style="opacity: 1;"><g transform="translate(220,184) scale(1,-1)"><ellipse rx="22" ry="9" fill="#9aa"></ellipse><polygon points="22,0 36,-8 36,8" fill="#9aa"></polygon><circle cx="-12" cy="-2" r="2" fill="#333"></circle></g><g transform="translate(430,190) scale(1,-1)"><ellipse rx="22" ry="9" fill="#9aa"></ellipse><polygon points="22,0 36,-8 36,8" fill="#9aa"></polygon><circle cx="-12" cy="-2" r="2" fill="#333"></circle></g></g><g data-on="3" style="opacity: 0;"><ellipse cx="150" cy="176" rx="46" ry="7" fill="#4f8f2e"></ellipse><ellipse cx="330" cy="174" rx="60" ry="8" fill="#5da035"></ellipse><ellipse cx="560" cy="177" rx="48" ry="7" fill="#4f8f2e"></ellipse><text x="330" y="150" text-anchor="middle" font-size="13" fill="#2f5a1c" font-weight="700">Algae bloom</text></g><g data-on="4" style="opacity: 0;"><circle cx="560" cy="70" r="16" fill="#e0b48a"></circle><rect x="544" y="88" width="32" height="50" rx="8" fill="#c23b32"></rect><rect x="580" y="100" width="12" height="16" fill="#7a6a3c"></rect><text x="455" y="38" font-size="13" fill="#c23b32" font-weight="700">Diarrhoea · Cholera · Typhoid</text></g><g data-on="0 7 8 10" style="opacity: 0;"><g class="swim"><ellipse cx="300" cy="215" rx="22" ry="9" fill="#f0a030"></ellipse><polygon points="322,215 336,207 336,223" fill="#f0a030"></polygon><circle cx="288" cy="213" r="2" fill="#333"></circle></g><g class="swim"><ellipse cx="480" cy="235" rx="22" ry="9" fill="#f0a030"></ellipse><polygon points="502,235 516,227 516,243" fill="#f0a030"></polygon><circle cx="468" cy="233" r="2" fill="#333"></circle></g></g><g data-on="5 6 10" style="opacity: 0;"><line x1="480" y1="150" x2="480" y2="205" stroke="#222" stroke-width="4"></line><circle cx="480" cy="146" r="9" fill="#e3a91b"></circle><path class="sig" d="M465 132Q480 116 495 132" fill="none" stroke="#e3a91b" stroke-width="3"></path><path class="sig" d="M457 122Q480 98 503 122" fill="none" stroke="#e3a91b" stroke-width="3" style="animation-delay:.4s"></path><circle class="pkt" cx="490" cy="130" r="4" fill="#fff"></circle><circle class="pkt" cx="490" cy="130" r="4" fill="#fff" style="animation-delay:.9s"></circle></g><g data-on="5" style="opacity: 0;"><rect x="520" y="20" width="160" height="62" rx="6" fill="#fff" stroke="#0d6b7a" stroke-width="3"></rect><text x="600" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#0d6b7a">Live sensor data</text><text x="600" y="66" text-anchor="middle" font-size="11" fill="#222">pH · DO · Turbidity · TDS</text></g><g data-on="6" style="opacity: 0;"><rect x="520" y="20" width="160" height="62" rx="6" fill="#fff" stroke="#c23b32" stroke-width="3"></rect><text x="600" y="45" text-anchor="middle" font-size="15" font-weight="700" fill="#c23b32">ALERT</text><text x="600" y="66" text-anchor="middle" font-size="11" fill="#222">Forecast: oxygen falling</text></g><g data-on="7" style="opacity: 0;"><rect x="70" y="95" width="150" height="75" fill="#4d7c8a"></rect><rect x="90" y="75" width="20" height="20" fill="#3d6470"></rect><text x="145" y="130" text-anchor="middle" font-size="13" fill="#fff">Sewage Treatment</text><text x="145" y="148" text-anchor="middle" font-size="13" fill="#fff">Plant</text><rect x="220" y="150" width="90" height="8" fill="#9bd0dc"></rect><circle class="drop" cx="305" cy="162" r="4" fill="#9bd0dc"></circle><text x="240" y="140" font-size="12" fill="#2a5560">Treated water</text></g><g data-on="8" style="opacity: 0;"><rect x="80" y="125" width="10" height="45" fill="#5c4026"></rect><circle cx="85" cy="110" r="30" fill="#2e7d32"></circle><rect x="560" y="120" width="10" height="50" fill="#5c4026"></rect><circle cx="565" cy="104" r="34" fill="#3b8f3f"></circle><g stroke="#2f7a3c" stroke-width="4" stroke-linecap="round" fill="none"><path class="sway" d="M300 172Q296 140 290 120"></path><path class="sway" d="M320 172Q324 138 332 118"></path><path class="sway" d="M340 172Q337 146 343 128"></path></g><text x="320" y="100" text-anchor="middle" font-size="13" fill="#1f5a2a" font-weight="700">Wetlands and greenery</text></g><g data-on="10" style="opacity: 0;"><rect x="520" y="20" width="160" height="62" rx="6" fill="#fff" stroke="#1f8a5b" stroke-width="3"></rect><text x="600" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#1f8a5b">Water quality: GOOD</text><text x="600" y="66" text-anchor="middle" font-size="11" fill="#222">Live sensor monitoring</text><polygon points="90,110 140,92 140,138 90,126" fill="#e3a91b"></polygon><text x="115" y="160" text-anchor="middle" font-size="12" fill="#6b4f00">Awareness</text><text x="330" y="120" text-anchor="middle" font-size="22" font-weight="700" fill="#1f5a2a">Every drop counts</text></g><g data-on="0 11" class="brd" fill="none" stroke="#335" stroke-width="2" style="opacity: 0;"><path d="M0 40q8-10 16 0q8-10 16 0"></path><path d="M40 62q6-8 12 0q6-8 12 0"></path></g>
+<g data-on="9" style="opacity: 0;"><rect x="60" y="100" width="120" height="70" fill="#5b6b70"></rect><rect x="80" y="72" width="16" height="30" fill="#4a575b"></rect><circle cx="560" cy="80" r="34" fill="#1f8a5b"></circle><path d="M543 80l12 12 22-26" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path><text x="560" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#1f5a2a">Inspected and compliant</text></g>
+<g data-on="11" style="opacity: 0;"><text x="350" y="110" text-anchor="middle" font-size="28" font-weight="700" fill="#1f5a2a">Save water. Save life.</text></g>
+</svg><span class="chip e" id="chip">EFFECT</span><div class="sub2" id="cap2"><b>Aquatic life under threat</b><span class="w" style="animation-delay:0s">Toxic </span><span class="w" style="animation-delay:0.09s">waste </span><span class="w" style="animation-delay:0.18s">and </span><span class="w" style="animation-delay:0.27s">falling </span><span class="w" style="animation-delay:0.36s">oxygen </span><span class="w" style="animation-delay:0.44999999999999996s">kill </span><span class="w" style="animation-delay:0.54s">fish </span><span class="w" style="animation-delay:0.63s">and </span><span class="w" style="animation-delay:0.72s">damage </span><span class="w" style="animation-delay:0.8099999999999999s">the </span><span class="w" style="animation-delay:0.8999999999999999s">whole </span><span class="w" style="animation-delay:0.99s">food </span><span class="w" style="animation-delay:1.08s">chain. </span></div>
+<div class="ctl"><div class="segs" id="segs"><div class="seg"><i style="width: 100%;"></i></div><div class="seg"><i style="width: 100%;"></i></div><div class="seg"><i style="width: 60%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div></div><button id="v2p" aria-label="Play or pause">❚❚</button><button id="v2r" aria-label="Replay">↺</button><select id="v2x" aria-label="Speed"><option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select><button id="v2v">🔇 Voice</button><button id="v2f" aria-label="Fullscreen">⛶</button><span class="tm" id="tm">0:15 / 1:12</span></div></div>
+<p class="note">Animated explainer, about 1 minute (not real footage). Click a bar segment to jump to a scene.</p></div>
+<details open=""><summary>1. What is water pollution?</summary><p>Water pollution is the contamination of rivers, lakes, groundwater and seas by waste, chemicals, heat or disease-causing microbes. It makes water unsafe for drinking, farming, industry and aquatic life.</p><ul><li><b>Surface water:</b> rivers, lakes, ponds.</li><li><b>Groundwater:</b> wells and aquifers, slow to recover once polluted.</li><li><b>Marine:</b> coasts and seas, often from river discharge.</li><li><b>Thermal:</b> hot water released by industries.</li></ul><p>In India the challenge is large because of a dense population, fast-growing cities, industry and intensive farming.</p><p class="note"><a href="https://www.google.com/search?q=water+pollution+in+India+causes+and+effects" target="_blank" rel="noopener noreferrer">Water pollution in India ↗</a> · <a href="https://www.google.com/search?q=types+of+water+pollution" target="_blank" rel="noopener noreferrer">Types of water pollution ↗</a></p><p><b>Point source:</b> one clear place, such as a factory pipe or drain. <b>Non-point source:</b> many places, such as farm runoff or street wash. In India, a large population, fast urban growth, industry and farming all put pressure on rivers and groundwater.</p><div class="links"><a href="https://www.google.com/search?q=water+pollution+in+India+causes+and+effects" target="_blank" rel="noopener noreferrer">🔎 Water pollution in India</a><a href="https://www.google.com/search?q=point+source+and+non+point+source+pollution" target="_blank" rel="noopener noreferrer">🔎 Point and non-point sources</a></div></details><details><summary>2. Main sources</summary><p><b>Point sources</b> have a clear outlet (a drain or pipe). <b>Non-point sources</b> are spread over an area (field runoff).</p><ul><li><b>Domestic sewage:</b> untreated or partly treated waste from towns and villages.</li><li><b>Industrial effluent:</b> chemicals, heavy metals, dyes, oils, hot water.</li><li><b>Agricultural runoff:</b> fertilizers, pesticides and soil washed by rain.</li><li><b>Solid waste and plastics:</b> dumped in or near water bodies.</li><li><b>Others:</b> mining, oil spills, religious offerings and tourism.</li></ul><p class="note"><a href="https://www.google.com/search?q=sources+of+water+pollution+point+and+non-point" target="_blank" rel="noopener noreferrer">Sources of water pollution ↗</a></p><p><b>More sources:</b> mining, oil spills, religious offerings, tourism, boats and dumped plastic and solid waste.</p><div class="links"><a href="https://www.google.com/search?q=sources+of+river+pollution+India" target="_blank" rel="noopener noreferrer">🔎 Sources of river pollution</a><a href="https://www.google.com/search?q=industrial+effluent+water+pollution" target="_blank" rel="noopener noreferrer">🔎 Industrial effluent</a></div></details><details><summary>3. Parameters we measure</summary><p class="note">Click a sensor card on the dashboard to jump to its explanation.</p><details id="p-ph"><summary>pH</summary><p>A scale of 0 to 14 showing how acidic or alkaline water is. Most natural freshwater sits near neutral. Sudden shifts often come from industrial discharge or chemical spills and stress fish and plants.</p></details><details id="p-do"><summary>Dissolved oxygen (DO)</summary><p>Oxygen dissolved in water, needed by fish and other life. Organic waste uses oxygen as bacteria break it down, so low DO is a strong sign of sewage or organic pollution. Cold, flowing water holds more oxygen.</p></details><details id="p-tb"><summary>Turbidity</summary><p>Cloudiness caused by suspended silt, waste or algae, measured in NTU. High turbidity blocks sunlight, harms plants and can shelter germs, which makes disinfection harder.</p></details><details id="p-tds"><summary>Total dissolved solids (TDS)</summary><p>The amount of dissolved salts and minerals, in mg/L. High TDS can come from industrial discharge, mining or runoff. It changes taste and makes water less suitable for drinking and irrigation.</p></details><details id="p-tp"><summary>Temperature</summary><p>Warm water holds less oxygen and speeds up algae growth. Hot discharge from power plants or factories can stress aquatic life.</p></details><p class="note">Also used officially: BOD, COD, conductivity, nutrients, heavy metals and faecal coliform. <a href="https://www.google.com/search?q=water+quality+parameters+pH+DO+BOD+turbidity+TDS" target="_blank" rel="noopener noreferrer">Water quality parameters ↗</a></p></details><details><summary>4. Effects of water pollution</summary><ul><li><b>Health:</b> diarrhoea, cholera, typhoid and exposure to toxic chemicals.</li><li><b>Ecosystem:</b> fish deaths, loss of biodiversity, broken food chains.</li><li><b>Eutrophication:</b> excess nutrients cause algae blooms and oxygen loss.</li><li><b>Economy:</b> costlier water treatment, lower crop and fishery output.</li><li><b>Society:</b> loss of safe water, mainly for poorer communities.</li></ul><p class="note"><a href="https://www.google.com/search?q=effects+of+water+pollution+on+health+and+environment" target="_blank" rel="noopener noreferrer">Effects of water pollution ↗</a></p><p><b>Chain effect:</b> pollution enters the food chain through fish, crops and drinking water. It also raises water treatment cost and harms farming, fishing and tourism.</p><div class="links"><a href="https://www.google.com/search?q=effects+of+water+pollution+on+health" target="_blank" rel="noopener noreferrer">🔎 Effects of water pollution</a><a href="https://www.google.com/search?q=eutrophication+algae+bloom" target="_blank" rel="noopener noreferrer">🔎 Eutrophication</a><a href="https://www.google.com/search?q=waterborne+diseases+India" target="_blank" rel="noopener noreferrer">🔎 Waterborne diseases</a></div></details><details><summary>5. Digital technologies for monitoring</summary><ul><li><b>IoT sensors:</b> probes in the water send pH, DO, turbidity, TDS and temperature over wireless links for near real-time data.</li><li><b>Remote sensing / satellites:</b> track algae, turbidity and changes across whole river stretches.</li><li><b>AI / machine learning:</b> spot unusual readings and forecast trends.</li><li><b>GIS and dashboards:</b> maps and live views so authorities can act fast.</li><li><b>Mobile and citizen apps:</b> public reporting and awareness.</li></ul><p><b>Limits:</b> sensor cost, calibration and cleaning, power and network gaps, and data accuracy.</p><p>This prototype shows the sensor, alert and dashboard idea with simulated data.</p><p class="note"><a href="https://www.google.com/search?q=IoT+water+quality+monitoring+system" target="_blank" rel="noopener noreferrer">IoT water quality monitoring ↗</a> · <a href="https://www.google.com/search?q=remote+sensing+water+quality+monitoring" target="_blank" rel="noopener noreferrer">Remote sensing water quality ↗</a></p><p><b>More tools:</b> GIS maps, drones for hard-to-reach stretches and citizen reporting apps. <b>This prototype:</b> sensor, data transfer, dashboard checks limits, then alert, forecast and diagnosis (data is simulated).</p><div class="links"><a href="https://www.google.com/search?q=IoT+based+water+quality+monitoring+system" target="_blank" rel="noopener noreferrer">🔎 IoT water quality monitoring</a><a href="https://www.google.com/search?q=remote+sensing+water+quality+monitoring" target="_blank" rel="noopener noreferrer">🔎 Remote sensing water quality</a><a href="https://www.google.com/search?q=machine+learning+water+quality+prediction" target="_blank" rel="noopener noreferrer">🔎 Machine learning water quality</a></div></details><details><summary>6. Who monitors water in India</summary><ul><li><b>CPCB</b> (Central Pollution Control Board) and <b>State Pollution Control Boards</b> monitor water quality and enforce rules.</li><li>The <b>National Water Quality Monitoring Programme</b> samples rivers and other water bodies.</li><li><b>Ministry of Jal Shakti</b> and the <b>National Mission for Clean Ganga (Namami Gange)</b> work on river cleaning.</li><li>The <b>Water (Prevention and Control of Pollution) Act, 1974</b> is the main law.</li><li>Real-time monitoring stations exist on some rivers; check CPCB for current details.</li></ul><p class="note"><a href="https://cpcb.nic.in/" target="_blank" rel="noopener noreferrer">CPCB website ↗</a> · <a href="https://www.google.com/search?q=Namami+Gange+programme+National+Mission+for+Clean+Ganga" target="_blank" rel="noopener noreferrer">Namami Gange ↗</a> · <a href="https://www.google.com/search?q=Water+Prevention+and+Control+of+Pollution+Act+1974" target="_blank" rel="noopener noreferrer">Water Act 1974 ↗</a></p><p><b>Also:</b> the National Water Quality Monitoring Programme network, the Central Water Commission, the Water (Prevention and Control of Pollution) Act, 1974, and the National Green Tribunal for environmental cases. Namami Gange was launched in 2014.</p><div class="links"><a href="https://cpcb.nic.in/" target="_blank" rel="noopener noreferrer">🌐 CPCB</a><a href="https://nmcg.nic.in/" target="_blank" rel="noopener noreferrer">🌐 NMCG</a><a href="https://jalshakti-dowr.gov.in/" target="_blank" rel="noopener noreferrer">🌐 Jal Shakti</a><a href="https://www.google.com/search?q=Water+Prevention+and+Control+of+Pollution+Act+1974" target="_blank" rel="noopener noreferrer">🔎 Water Act 1974</a></div></details><details><summary>7. Remediation (solutions)</summary><ul><li><b>Treat:</b> sewage (STP) and effluent (ETP) treatment plants that actually run well.</li><li><b>Regulate:</b> strict discharge limits, inspection and penalties.</li><li><b>Restore:</b> wetlands, bioremediation and green riverbanks.</li><li><b>Reduce:</b> better farming (less fertilizer, buffer strips) and less plastic.</li><li><b>Reuse:</b> treated wastewater for industry and irrigation.</li><li><b>Involve people:</b> awareness drives and citizen reporting.</li></ul><p class="note"><a href="https://www.google.com/search?q=water+pollution+control+solutions+India" target="_blank" rel="noopener noreferrer">Water pollution solutions ↗</a> · <a href="https://www.google.com/search?q=bioremediation+of+polluted+water" target="_blank" rel="noopener noreferrer">Bioremediation of water ↗</a></p><p><b>More ideas:</b> zero liquid discharge for industry, reuse of treated water, balanced fertilizer use, bioremediation, and citizen clean-up drives.</p><div class="links"><a href="https://www.google.com/search?q=how+sewage+treatment+plant+works" target="_blank" rel="noopener noreferrer">🔎 Sewage treatment plant</a><a href="https://www.google.com/search?q=constructed+wetlands+water+treatment" target="_blank" rel="noopener noreferrer">🔎 Constructed wetlands</a><a href="https://www.google.com/search?q=bioremediation+polluted+water" target="_blank" rel="noopener noreferrer">🔎 Bioremediation</a></div></details><details><summary>8. Standards at a glance</summary><p>Drinking water in India follows <b>BIS IS 10500</b>. Rivers are grouped by <b>CPCB designated best use classes</b> (A to E), from drinking source after disinfection to irrigation and cooling. See the "Standard values" table on the main page.</p><p class="note"><a href="https://www.bis.gov.in/" target="_blank" rel="noopener noreferrer">BIS website ↗</a> · <a href="https://www.google.com/search?q=BIS+IS+10500+drinking+water+specification" target="_blank" rel="noopener noreferrer">BIS IS 10500 ↗</a> · <a href="https://www.google.com/search?q=CPCB+primary+water+quality+criteria+designated+best+use" target="_blank" rel="noopener noreferrer">CPCB water quality criteria ↗</a></p></details><details><summary>9. Key terms</summary><ul><li><b>BOD:</b> biochemical oxygen demand, oxygen microbes need to break down waste.</li><li><b>COD:</b> chemical oxygen demand, oxygen needed to chemically oxidise waste.</li><li><b>NTU:</b> nephelometric turbidity unit, the unit of turbidity.</li><li><b>Effluent:</b> liquid waste released by a factory or plant.</li><li><b>Eutrophication:</b> nutrient overload causing algae blooms.</li><li><b>STP / ETP:</b> sewage / effluent treatment plant.</li></ul><p class="note"><a href="https://www.google.com/search?q=difference+between+BOD+and+COD" target="_blank" rel="noopener noreferrer">BOD vs COD ↗</a></p></details><details><summary>10. Links and bibliography</summary><ul><li><a href="https://cpcb.nic.in/" target="_blank" rel="noopener noreferrer">Central Pollution Control Board ↗</a></li><li><a href="https://www.who.int/news-room/fact-sheets/detail/drinking-water" target="_blank" rel="noopener noreferrer">WHO: drinking-water fact sheet ↗</a></li><li><a href="https://sdgs.un.org/goals/goal6" target="_blank" rel="noopener noreferrer">UN SDG 6: clean water and sanitation ↗</a></li><li><a href="https://www.bis.gov.in/" target="_blank" rel="noopener noreferrer">Bureau of Indian Standards ↗</a></li><li><a href="https://www.google.com/search?q=water+pollution+monitoring+India+digital+technology" target="_blank" rel="noopener noreferrer">Search: water pollution monitoring India ↗</a></li></ul><p class="note">Links open in a new tab and need internet. In your report write the exact title, year and link of every document you really use.</p></details><details id="quizd"><summary>Quiz: test your knowledge</summary><div id="qbox"><p>Test what you learned about water pollution and this project.</p><button id="qgo" class="qo ok">Start quiz</button></div></details>
+</aside>
+<main>
+<div class="hero"><div class="logo" aria-hidden="true"><svg viewBox="0 0 64 76" width="64" height="76"><defs><radialgradient id="lg1" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#9ff3ff"></stop><stop offset=".45" stop-color="#1fa3c9"></stop><stop offset="1" stop-color="#0a4a7a"></stop></radialgradient><radialgradient id="lg2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="rgba(0,40,70,.45)"></stop><stop offset="1" stop-color="rgba(0,40,70,0)"></stop></radialgradient><lineargradient id="lg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></lineargradient></defs><ellipse cx="32" cy="70" rx="20" ry="4.5" fill="url(#lg2)"></ellipse><path d="M32 3C32 3 11 27 11 42a21 21 0 0 0 42 0C53 27 32 3 32 3Z" fill="url(#lg1)"></path><path d="M32 3C32 3 11 27 11 42a21 21 0 0 0 4 12.5C13 36 28 14 32 3Z" fill="#0a4a7a" opacity=".18"></path><ellipse cx="23" cy="30" rx="5" ry="11" transform="rotate(25 23 30)" fill="url(#lg3)"></ellipse><path d="M19 46h7l3-9 5 17 3-8h8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="43" cy="53" r="2" fill="#fff" opacity=".6"></circle></svg></div><div><h1>Water Quality Monitoring Dashboard</h1><p class="team">Aditya Tripathi · Aditya Raj · Katta Lokesh Surya Sivamani &nbsp;|&nbsp; Lovely Professional University</p></div><div class="live"><i></i><span id="livelbl">LIVE (simulated)</span><span id="clock">6:31:36 AM</span></div></div>
+<p class="sub">Prototype of an IoT-based river monitoring system: sensors send readings, the dashboard checks them against limits and raises alerts.</p>
+<div class="banner" id="dsbanner">Demo only: all readings on this page are <b>simulated</b>. They are not real measurements of any river. Station names are placeholders.</div>
+
+<div class="panel"><h2>Data source: use real data</h2>
+<p class="sub" style="margin:0 0 8px;font-size:.85rem">Right now the dashboard uses simulated values. You can replace them with real measurements: upload a CSV file, or load a public ThingSpeak channel (data sent by real sensors).</p>
+<div class="bar" style="margin-bottom:8px"><label for="csvf">CSV file</label><input type="file" id="csvf" accept=".csv,text/csv"><button id="smp">Download sample CSV format</button></div>
+<div class="bar" style="margin-bottom:8px"><label for="tsid">ThingSpeak</label><select id="tspick" aria-label="Public example channels" style="max-width:220px"><option value="">Pick a public example</option><option value="3378189">Aquasense (3378189)</option><option value="3378186">Aquasense (3378186)</option><option value="3305622">Water quality analysis (3305622)</option><option value="1656244">Water Quality Monitoring (1656244)</option><option value="2479480">Laguna Jucutuma network (2479480)</option></select><input id="tsid" placeholder="Channel ID" size="12" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)"><input id="tskey" placeholder="Read API key (optional)" size="20" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)"><button id="tsgo">Load channel</button><button id="back">Back to simulated</button></div>
+<p id="dsmsg" class="sub" style="margin:0;font-size:.82rem">CSV column names are detected automatically (pH, dissolved oxygen, turbidity, TDS, temperature; optional station/location column). ThingSpeak fields are matched by their names (pH, TDS, turbidity, temperature, oxygen), so any channel with such field names works. The example channels are hobby or student IoT projects, not official government monitoring. Real-data features work when you open the file locally (VS Code); some sites block browser requests.</p>
+<div class="links" style="margin-top:8px"><a href="https://www.data.gov.in/search?title=water%20monitoring" target="_blank" rel="noopener noreferrer">🌐 data.gov.in: water monitoring datasets</a><a href="https://indiawris.gov.in/" target="_blank" rel="noopener noreferrer">🌐 India-WRIS</a><a href="https://cpcb.nic.in/" target="_blank" rel="noopener noreferrer">🌐 CPCB</a></div>
+<p class="sub" style="margin:6px 0 0;font-size:.8rem">Tip: download a CSV from one of these sites, then use "CSV file" above. Government files often list one row per station (not a time series), so the dashboard then steps through the rows one by one. Columns missing in the file stay simulated and are listed in the message.</p></div>
+<div class="bar">
+<label for="st">Station</label>
+<select id="st"><option>Station A (upstream)</option><option>Station B (city stretch)</option><option>Station C (downstream)</option></select>
+<label for="stype" class="chk">Type</label><select id="stype"><option value="sewage">Sewage</option><option value="industrial">Industrial effluent</option><option value="agri">Agricultural runoff</option></select><button id="spill" class="primary">Simulate pollution event</button>
+<button id="pause">Pause</button><button id="csv">Export CSV</button><label class="chk"><input type="checkbox" id="snd"> Alarm sound</label>
+<div id="overall" class="overall" style="background: var(--ok);">Overall: Safe</div>
+</div>
+
+<div class="top"><div class="panel gauge"><svg id="wqi" viewBox="0 0 120 120" role="img" aria-label="Water quality score"><circle cx="60" cy="60" r="48" fill="none" stroke="var(--line)" stroke-width="10"></circle><circle id="wr" cx="60" cy="60" r="48" fill="none" stroke="var(--ok)" stroke-width="10" stroke-linecap="round" stroke-dasharray="302 302" transform="rotate(-90 60 60)"></circle><text id="wn" x="60" y="68" text-anchor="middle" font-size="30" font-weight="700" fill="currentColor">100</text></svg><b id="wl">Good</b><small>Water Quality Score<br>(indicative, 0-100)</small></div><div class="grid" id="cards"><button class="card ok sel" data-k="ph"><div class="n">pH</div><div class="v">7.35 <small></small></div><div class="r">Limit: 6.5 to 8.5 · <b class="t-ok">Safe</b></div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="0.0,13.6 2.6,8.9 5.1,21.1 7.7,7.7 10.3,17.4 12.8,15.4 15.4,14.0 17.9,22.2 20.5,12.0 23.1,8.5 25.6,23.4 28.2,14.5 30.8,17.6 33.3,13.3 35.9,15.2 38.5,11.0 41.0,22.7 43.6,21.7 46.2,12.1 48.7,13.7 51.3,15.0 53.8,21.8 56.4,19.4 59.0,4.1 61.5,21.5 64.1,9.5 66.7,13.4 69.2,2.0 71.8,19.9 74.4,18.2 76.9,26.0 79.5,21.0 82.1,23.0 84.6,23.1 87.2,10.2 89.7,20.9 92.3,22.4 94.9,8.9 97.4,18.0 100.0,19.3"></polyline></svg></button><button class="card ok" data-k="do"><div class="n">Dissolved oxygen</div><div class="v">6.8 <small>mg/L</small></div><div class="r">Limit: 5 to 14 · <b class="t-ok">Safe</b></div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="0.0,25.5 2.6,10.8 5.1,24.9 7.7,25.8 10.3,17.0 12.8,7.6 15.4,11.3 17.9,10.7 20.5,21.3 23.1,7.4 25.6,11.2 28.2,19.1 30.8,16.7 33.3,13.2 35.9,14.4 38.5,14.7 41.0,8.5 43.6,25.4 46.2,10.0 48.7,26.0 51.3,7.7 53.8,23.6 56.4,9.5 59.0,24.2 61.5,15.2 64.1,14.2 66.7,23.2 69.2,11.5 71.8,7.4 74.4,16.9 76.9,15.2 79.5,12.4 82.1,14.7 84.6,5.0 87.2,11.0 89.7,2.0 92.3,6.7 94.9,11.9 97.4,4.4 100.0,3.5"></polyline></svg></button><button class="card ok" data-k="tb"><div class="n">Turbidity</div><div class="v">2.8 <small>NTU</small></div><div class="r">Limit: 0 to 5 · <b class="t-ok">Safe</b></div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="0.0,16.4 2.6,19.9 5.1,3.4 7.7,25.1 10.3,15.8 12.8,7.3 15.4,24.3 17.9,26.0 20.5,25.9 23.1,5.9 25.6,18.5 28.2,17.7 30.8,3.7 33.3,17.9 35.9,21.6 38.5,12.0 41.0,21.4 43.6,5.8 46.2,14.1 48.7,18.2 51.3,14.3 53.8,21.6 56.4,22.3 59.0,13.6 61.5,11.5 64.1,20.8 66.7,12.8 69.2,19.5 71.8,8.1 74.4,12.1 76.9,7.4 79.5,17.6 82.1,9.3 84.6,3.7 87.2,16.3 89.7,12.9 92.3,17.6 94.9,11.7 97.4,2.0 100.0,8.1"></polyline></svg></button><button class="card ok" data-k="tds"><div class="n">TDS</div><div class="v">327 <small>mg/L</small></div><div class="r">Limit: 0 to 500 · <b class="t-ok">Safe</b></div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="0.0,11.4 2.6,5.8 5.1,18.6 7.7,2.8 10.3,7.1 12.8,4.5 15.4,10.9 17.9,2.7 20.5,6.0 23.1,7.4 25.6,17.1 28.2,20.1 30.8,8.5 33.3,16.0 35.9,4.5 38.5,9.6 41.0,13.8 43.6,8.7 46.2,13.6 48.7,12.9 51.3,6.2 53.8,17.2 56.4,8.1 59.0,7.4 61.5,4.0 64.1,2.0 66.7,17.3 69.2,2.7 71.8,18.9 74.4,18.2 76.9,19.1 79.5,15.3 82.1,20.3 84.6,15.2 87.2,18.6 89.7,14.4 92.3,24.6 94.9,26.0 97.4,19.6 100.0,14.3"></polyline></svg></button><button class="card ok" data-k="tp"><div class="n">Temperature</div><div class="v">26.2 <small>°C</small></div><div class="r">Limit: 0 to 35 · <b class="t-ok">Safe</b></div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="0.0,7.1 2.6,6.0 5.1,8.0 7.7,4.6 10.3,4.8 12.8,3.7 15.4,8.3 17.9,4.3 20.5,2.4 23.1,6.5 25.6,4.4 28.2,5.3 30.8,5.8 33.3,9.5 35.9,3.7 38.5,3.4 41.0,7.8 43.6,2.9 46.2,6.1 48.7,9.6 51.3,8.4 53.8,4.5 56.4,2.5 59.0,4.1 61.5,2.0 64.1,4.5 66.7,7.1 69.2,4.9 71.8,4.5 74.4,4.4 76.9,4.6 79.5,7.6 82.1,10.5 84.6,12.0 87.2,16.9 89.7,19.1 92.3,22.5 94.9,21.6 97.4,26.0 100.0,22.6"></polyline></svg></button></div></div>
+
+<div class="panel"><h2 id="ct">pH - last 40 readings at Station B (city stretch)</h2><svg id="chart" viewBox="0 0 700 220" role="img" aria-label="Line chart of the selected parameter over the last 40 readings"><line x1="44" x2="690" y1="196" y2="196" stroke="var(--line)"></line><text x="38" y="200" text-anchor="end" font-size="11" fill="var(--mute)">6</text><line x1="44" x2="690" y1="149.5" y2="149.5" stroke="var(--line)"></line><text x="38" y="153.5" text-anchor="end" font-size="11" fill="var(--mute)">7</text><line x1="44" x2="690" y1="103" y2="103" stroke="var(--line)"></line><text x="38" y="107" text-anchor="end" font-size="11" fill="var(--mute)">8</text><line x1="44" x2="690" y1="56.5" y2="56.5" stroke="var(--line)"></line><text x="38" y="60.5" text-anchor="end" font-size="11" fill="var(--mute)">8</text><line x1="44" x2="690" y1="10" y2="10" stroke="var(--line)"></line><text x="38" y="14" text-anchor="end" font-size="11" fill="var(--mute)">9</text><line x1="44" x2="690" y1="183.17241379310343" y2="183.17241379310343" stroke="var(--bad)" stroke-dasharray="5 4"></line><line x1="44" x2="690" y1="22.827586206896555" y2="22.827586206896555" stroke="var(--bad)" stroke-dasharray="5 4"></line><polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="44,112.43772634006481 60.56410256410257,110.07421762915267 77.12820512820514,116.1631829803406 93.6923076923077,109.4921968505361 110.25641025641026,114.30414576703069 126.82051282051282,113.32022259554068 143.3846153846154,112.6093642737952 159.94871794871796,116.71322312818425 176.51282051282053,111.64003591821248 193.07692307692307,109.91028458953458 209.64102564102564,117.32774708643475 226.2051282051282,112.88581152982432 242.76923076923077,114.41790652048016 259.33333333333337,112.27476641946835 275.8974358974359,113.22281901531233 292.46153846153845,111.12444610108376 309.02564102564105,116.98016467367398 325.5897435897436,116.46032512638698 342.15384615384613,111.6882272493797 358.71794871794873,112.49104130347064 375.28205128205127,113.14037650468512 391.84615384615387,116.5313780096895 408.4102564102564,115.30204572670574 424.97435897435895,107.70197620615745 441.53846153846155,116.37837828275073 458.1025641025641,110.38571664998008 474.6666666666667,112.34929117518959 491.2307692307692,106.66259584399788 507.79487179487177,115.57336994268087 524.3589743589744,114.71141649022742 540.9230769230769,118.60494537581692 557.4871794871794,116.14127140325397 574.0512820512821,117.12308515108299 590.6153846153846,117.1536416548998 607.1794871794872,110.73185078526294 623.7435897435897,116.04538964398826 640.3076923076923,116.83728977114085 656.8717948717949,110.07955934275999 673.4358974358975,114.61115859708077 690,115.2958009529546"></polyline><circle cx="690" cy="115.2958009529546" r="5" fill="var(--ok)"></circle><text x="44" y="214" font-size="11" fill="var(--mute)">older</text><text x="690" y="214" text-anchor="end" font-size="11" fill="var(--mute)">latest (dashed red = limit)</text></svg></div>
+
+<div class="panel ins"><h2>AI insights and forecast (rule-based demo)</h2><div id="ins"><p><b>Diagnosis:</b> No anomaly detected right now.</p><ul><li>pH: stable</li><li>Dissolved oxygen: rising</li><li>Turbidity: stable</li><li>TDS: stable</li><li>Temperature: falling</li></ul><p class="sub" style="font-size:.8rem">Forecast uses a simple linear trend on the last 12 readings. Diagnosis is simple rule logic for demonstration, not a certified analysis.</p></div></div>
+<div class="panel"><h2>All stations at a glance</h2><div class="tw" id="cmp"><table><tbody><tr><th>Station</th><th>pH</th><th>Dissolved oxygen</th><th>Turbidity</th><th>TDS</th><th>Temperature</th></tr><tr><td>Station A (upstream)</td><td class="t-ok"><b>7.36</b></td><td class="t-ok"><b>6.8</b></td><td class="t-ok"><b>3.1</b></td><td class="t-ok"><b>330</b></td><td class="t-ok"><b>25.9</b></td></tr><tr><td>Station B (city stretch)</td><td class="t-ok"><b>7.35</b></td><td class="t-ok"><b>6.8</b></td><td class="t-ok"><b>2.8</b></td><td class="t-ok"><b>327</b></td><td class="t-ok"><b>26.2</b></td></tr><tr><td>Station C (downstream)</td><td class="t-ok"><b>7.35</b></td><td class="t-ok"><b>7.1</b></td><td class="t-ok"><b>2.4</b></td><td class="t-ok"><b>334</b></td><td class="t-ok"><b>26.9</b></td></tr></tbody></table></div></div>
+<div class="panel"><h2>Standard values: what the readings should be</h2>
+<div class="tw"><table><tbody><tr><th>Parameter</th><th>Standard / ideal range</th><th>Based on</th><th>Live reading</th></tr>
+<tr><td>pH</td><td><b>6.5 - 8.5</b></td><td>BIS IS 10500 (drinking water); CPCB classes A, B, D</td><td class="lv" data-k="ph"><b class="t-ok">7.35 </b> - Safe</td></tr>
+<tr><td>Dissolved oxygen</td><td><b>6+</b> mg/L (Class A), <b>5+</b> (B), <b>4+</b> (C, D)</td><td>CPCB designated best use classes</td><td class="lv" data-k="do"><b class="t-ok">6.8 mg/L</b> - Safe</td></tr>
+<tr><td>Turbidity</td><td><b>1 NTU</b> acceptable, up to <b>5 NTU</b> permissible</td><td>BIS IS 10500</td><td class="lv" data-k="tb"><b class="t-ok">2.8 NTU</b> - Safe</td></tr>
+<tr><td>TDS</td><td><b>500 mg/L</b> acceptable, up to <b>2000 mg/L</b> permissible (if no better source)</td><td>BIS IS 10500</td><td class="lv" data-k="tds"><b class="t-ok">327 mg/L</b> - Safe</td></tr>
+<tr><td>Temperature</td><td>No single river limit; should stay close to natural level</td><td>Hot discharge lowers oxygen. 35 °C is only a demo alert here</td><td class="lv" data-k="tp"><b class="t-ok">26.2 °C</b> - Safe</td></tr>
+<tr><td>BOD (not measured here)</td><td><b>2</b> mg/L or less (Class A), <b>3</b> or less (B, C)</td><td>CPCB designated best use classes</td><td>-</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin:8px 0 0;font-size:.8rem">Class A: drinking water source after disinfection. B: outdoor bathing. C: drinking source after conventional treatment. D: fish and wildlife. The dashboard alerts use the stricter practical values (pH 6.5-8.5, DO 5, turbidity 5 NTU, TDS 500). Values are from the BIS and CPCB standards as I know them, so check the latest official documents before writing them in your report.</p></div>
+<div class="panel"><h2>Alert log</h2><ul id="log"><li>No alerts yet.</li></ul></div>
+
+<div class="panel"><h2>Explainer: how a smart system catches water pollution</h2>
+<div class="player" id="pl1"><svg id="vid" viewBox="0 0 700 260" role="img" aria-label="Animated explainer of how an IoT water monitoring system detects pollution and raises an alert">
+<rect width="700" height="260" fill="#cfe6ec"></rect><circle cx="635" cy="42" r="24" fill="#ffd45e" opacity=".9"></circle>
+<g class="cl" fill="#fff" opacity=".8"><ellipse cx="150" cy="40" rx="44" ry="13"></ellipse><ellipse cx="180" cy="33" rx="30" ry="11"></ellipse></g>
+<rect y="162" width="700" height="10" fill="#6aa84f"></rect><rect id="river" y="170" width="700" height="90" fill="#3a9fb8"></rect>
+<g stroke="#fff" fill="none" opacity=".45"><ellipse class="rip" cx="110" cy="205" rx="40" ry="5"></ellipse><ellipse class="rip" cx="420" cy="230" rx="50" ry="6" style="animation-delay:1.2s"></ellipse><ellipse class="rip" cx="610" cy="210" rx="40" ry="5" style="animation-delay:2.2s"></ellipse></g>
+<g data-sc="0 7" class="brd" fill="none" stroke="#335" stroke-width="2" style="opacity: 1;"><path d="M0 40q8-10 16 0q8-10 16 0"></path><path d="M40 62q6-8 12 0q6-8 12 0"></path></g>
+<g data-sc="0 1" style="opacity: 1;"><rect x="40" y="100" width="120" height="62" fill="#5b6b70"></rect><rect x="60" y="70" width="16" height="32" fill="#4a575b"></rect><rect x="110" y="70" width="16" height="32" fill="#4a575b"></rect><circle class="smoke" cx="68" cy="66" r="9" fill="#888"></circle><circle class="smoke" cx="118" cy="66" r="9" fill="#888" style="animation-delay:1.2s"></circle></g>
+<g data-sc="0" style="opacity: 1;"><rect x="230" y="105" width="40" height="57" fill="#6a7b86"></rect><rect x="278" y="85" width="44" height="77" fill="#5b6b70"></rect><rect x="330" y="120" width="36" height="42" fill="#7a8a94"></rect><g fill="#ffd45e"><rect x="238" y="115" width="8" height="8"></rect><rect x="288" y="98" width="8" height="8"></rect><rect x="304" y="125" width="8" height="8"></rect><rect x="340" y="132" width="8" height="8"></rect></g></g>
+<g data-sc="1" style="opacity: 0;"><rect x="150" y="145" width="75" height="10" fill="#444"></rect><circle class="drop" cx="222" cy="160" r="4" fill="#6b4f1d"></circle><circle class="drop" cx="222" cy="160" r="4" fill="#6b4f1d" style="animation-delay:.5s"></circle><circle class="drop" cx="222" cy="160" r="4" fill="#6b4f1d" style="animation-delay:.9s"></circle></g>
+<g data-sc="2" style="opacity: 0;"><circle cx="300" cy="95" r="9" fill="#e0b48a"></circle><rect x="292" y="104" width="16" height="34" fill="#2f6f8f"></rect><path d="M296 138V162M304 138V162" stroke="#333" stroke-width="3"></path><path d="M308 112L330 128" stroke="#e0b48a" stroke-width="4"></path><rect x="328" y="124" width="8" height="16" rx="2" fill="#9bd0dc" stroke="#333"></rect><circle cx="450" cy="90" r="22" fill="#fff" stroke="#333" stroke-width="3"></circle><line class="esp" x1="450" y1="90" x2="450" y2="76" stroke="#c23b32" stroke-width="3"></line><rect x="540" y="95" width="100" height="67" fill="#7a8a94"></rect><text x="590" y="132" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Lab</text><text x="590" y="84" text-anchor="middle" font-size="12" fill="#223">Results come later</text></g>
+<g data-sc="3" style="opacity: 0;"><g class="ebob"><line x1="270" y1="150" x2="270" y2="215" stroke="#222" stroke-width="4"></line><ellipse cx="270" cy="158" rx="17" ry="7" fill="#e3a91b"></ellipse><line x1="270" y1="152" x2="270" y2="126" stroke="#222" stroke-width="3"></line><g fill="none" stroke="#e3a91b" stroke-width="3"><path class="esg" d="M258 118Q270 106 282 118"></path><path class="esg" style="animation-delay:.4s" d="M250 108Q270 90 290 108"></path></g></g><g font-size="12" font-weight="700" fill="#fff"><g class="ebob"><rect x="330" y="188" width="42" height="20" rx="10" fill="#0d6b7a"></rect><text x="351" y="202" text-anchor="middle">pH</text></g><g class="ebob" style="animation-delay:.4s"><rect x="385" y="205" width="42" height="20" rx="10" fill="#0d6b7a"></rect><text x="406" y="219" text-anchor="middle">DO</text></g><g class="ebob" style="animation-delay:.8s"><rect x="440" y="188" width="46" height="20" rx="10" fill="#0d6b7a"></rect><text x="463" y="202" text-anchor="middle">NTU</text></g><g class="ebob" style="animation-delay:1.2s"><rect x="498" y="205" width="46" height="20" rx="10" fill="#0d6b7a"></rect><text x="521" y="219" text-anchor="middle">TDS</text></g></g></g>
+<g data-sc="4" style="opacity: 0;"><line x1="140" y1="150" x2="140" y2="200" stroke="#222" stroke-width="4"></line><ellipse cx="140" cy="146" rx="14" ry="6" fill="#e3a91b"></ellipse><path d="M320 162L330 70L340 162" fill="none" stroke="#444" stroke-width="3"></path><g fill="#fff" stroke="#9ab" stroke-width="2"><ellipse cx="470" cy="55" rx="34" ry="14"></ellipse><ellipse cx="492" cy="48" rx="22" ry="12"></ellipse></g><rect x="560" y="60" width="60" height="40" rx="4" fill="#fff" stroke="#333" stroke-width="3"></rect><rect x="548" y="100" width="84" height="6" fill="#333"></rect><path class="edsh" d="M150 140L330 70L470 55L590 80" fill="none" stroke="#0d6b7a" stroke-width="2"></path><g fill="#ffd45e" stroke="#c98a00"><circle r="5"><animatemotion dur="2.4s" repeatCount="indefinite" path="M150 140L330 70L470 55L590 80"></animatemotion></circle><circle r="5"><animatemotion dur="2.4s" begin=".8s" repeatCount="indefinite" path="M150 140L330 70L470 55L590 80"></animatemotion></circle><circle r="5"><animatemotion dur="2.4s" begin="1.6s" repeatCount="indefinite" path="M150 140L330 70L470 55L590 80"></animatemotion></circle></g><g font-size="12" fill="#223" text-anchor="middle" font-weight="700"><text x="140" y="228" fill="#fff">Sensor</text><text x="330" y="188" fill="#fff">Network</text><text x="470" y="90">Cloud</text><text x="590" y="124">Dashboard</text></g></g>
+<g data-sc="5" style="opacity: 0;"><rect x="170" y="22" width="360" height="138" rx="10" fill="#fff" stroke="#0d6b7a" stroke-width="3"></rect><text x="186" y="42" font-size="13" font-weight="700" fill="#0d6b7a">Water Quality Dashboard</text><line x1="190" y1="70" x2="510" y2="70" stroke="#c23b32" stroke-dasharray="5 4"></line><text x="506" y="64" text-anchor="end" font-size="10" fill="#c23b32">limit</text><polyline class="edr" fill="none" stroke="#0d6b7a" stroke-width="3" points="195,108 225,104 255,107 285,102 315,106 345,100 375,62 405,52 435,56 465,48"></polyline><g font-size="11" font-weight="700" fill="#fff"><rect x="190" y="124" width="96" height="22" rx="5" fill="#1f8a5b"></rect><text x="238" y="139" text-anchor="middle">pH OK</text><rect x="296" y="124" width="96" height="22" rx="5" fill="#c23b32"></rect><text x="344" y="139" text-anchor="middle">DO low</text><rect x="402" y="124" width="96" height="22" rx="5" fill="#c23b32"></rect><text x="450" y="139" text-anchor="middle">Turbid</text></g><text x="350" y="178" text-anchor="middle" font-size="10" fill="#fff" opacity=".8">Example readings</text></g>
+<g data-sc="6" style="opacity: 0;"><rect x="40" y="40" width="150" height="90" rx="8" fill="#fff" stroke="#c23b32" stroke-width="3"></rect><circle class="ebk" cx="66" cy="68" r="9" fill="#c23b32"></circle><text x="86" y="74" font-size="16" font-weight="700" fill="#c23b32">ALERT</text><text x="115" y="108" text-anchor="middle" font-size="11" fill="#222">Limit crossed</text><path d="M520 70L585 40L650 70Z" fill="#3d6470"></path><rect x="530" y="70" width="110" height="92" fill="#4d7c8a"></rect><text x="585" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Authorities</text><rect width="18" height="12" x="-9" y="-6" fill="#fff" stroke="#333"><animatemotion dur="2.6s" repeatCount="indefinite" path="M200 85L510 85"></animatemotion></rect><line class="edsh" x1="200" y1="85" x2="520" y2="85" stroke="#c23b32" stroke-width="2"></line></g>
+<g data-sc="7" style="opacity: 0;"><g class="swim"><ellipse cx="260" cy="215" rx="22" ry="9" fill="#f0a030"></ellipse><polygon points="282,215 296,207 296,223" fill="#f0a030"></polygon></g><g class="swim" style="animation-delay:-1.4s"><ellipse cx="470" cy="238" rx="20" ry="8" fill="#ffb347"></ellipse><polygon points="490,238 502,231 502,245" fill="#ffb347"></polygon></g><rect x="80" y="118" width="10" height="46" fill="#5c4026"></rect><circle cx="85" cy="102" r="32" fill="#2e7d32"></circle><rect x="600" y="122" width="10" height="42" fill="#5c4026"></rect><circle cx="605" cy="106" r="30" fill="#3b8f3f"></circle><g stroke="#2f7a3c" stroke-width="4" stroke-linecap="round" fill="none"><path class="sway" d="M330 164Q326 138 320 118"></path><path class="sway" d="M350 164Q354 136 362 116"></path></g><circle cx="400" cy="70" r="28" fill="#1f8a5b"></circle><path d="M386 70l10 10 20-24" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path></g>
+</svg><span class="chip i" id="chip1">THE PROBLEM</span><div class="sub2" id="cap"><b style="display:block;font-size:.66rem;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:2px">Rivers under pressure</b><span class="w" style="animation-delay:0s">Many </span><span class="w" style="animation-delay:0.09s">rivers </span><span class="w" style="animation-delay:0.18s">receive </span><span class="w" style="animation-delay:0.27s">waste </span><span class="w" style="animation-delay:0.36s">from </span><span class="w" style="animation-delay:0.44999999999999996s">cities, </span><span class="w" style="animation-delay:0.54s">industry </span><span class="w" style="animation-delay:0.63s">and </span><span class="w" style="animation-delay:0.72s">farms. </span><span class="w" style="animation-delay:0.8099999999999999s">Spotting </span><span class="w" style="animation-delay:0.8999999999999999s">pollution </span><span class="w" style="animation-delay:0.99s">quickly </span><span class="w" style="animation-delay:1.08s">is </span><span class="w" style="animation-delay:1.17s">the </span><span class="w" style="animation-delay:1.26s">hard </span><span class="w" style="animation-delay:1.3499999999999999s">part. </span></div>
+<div class="ctl"><div class="segs" id="segs1"><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div><div class="seg"><i style="width: 0%;"></i></div></div><button id="vp" aria-label="Play or pause">❚❚</button><button id="vr" aria-label="Replay">↺</button><select id="vx" aria-label="Speed"><option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select><button id="vv">🔇 Voice</button><button id="vf" aria-label="Fullscreen">⛶</button><span class="tm" id="tm1">0:00 / 0:48</span></div></div>
+<video id="rv" controls="" preload="metadata" hidden="" style="width:100%;margin-top:10px;border-radius:8px" src="water-pollution.mp4"></video>
+</div>
+
+<footer>Limits used: pH 6.5-8.5, dissolved oxygen at least 5 mg/L, turbidity up to 5 NTU, TDS up to 500 mg/L, temperature up to 35 C. These are indicative values from common bathing/drinking water norms (CPCB, BIS). Verify exact figures from official sources before quoting them in your report.</footer>
+</main>
+
+<script>
+// ---- Configuration ----
+var PARAMS=[
+ {k:"ph",n:"pH",u:"",lo:6.5,hi:8.5,base:7.4,noise:.08,dec:2},
+ {k:"do",n:"Dissolved oxygen",u:"mg/L",lo:5,hi:14,base:7.2,noise:.2,dec:1},
+ {k:"tb",n:"Turbidity",u:"NTU",lo:0,hi:5,base:2.5,noise:.3,dec:1},
+ {k:"tds",n:"TDS",u:"mg/L",lo:0,hi:500,base:320,noise:12,dec:0},
+ {k:"tp",n:"Temperature",u:"°C",lo:0,hi:35,base:26,noise:.15,dec:1}
+];
+var STATIONS=["Station A (upstream)","Station B (city stretch)","Station C (downstream)"];
+var HIST=40, data={}, spillLeft={}, sel="ph", paused=false, tick=0;
+
+STATIONS.forEach(function(s,i){
+  data[s]={};spillLeft[s]=0;
+  PARAMS.forEach(function(p){
+    var off=i*(p.k==="do"?-0.6:p.k==="ph"?0:p.base*0.03);
+    var arr=[];for(var j=0;j<HIST;j++)arr.push(p.base+off+(Math.random()-.5)*p.noise*2);
+    data[s][p.k]=arr;
+  });
+});
+
+// ---- Helpers ----
+function status(p,v){
+  if(v<p.lo||v>p.hi)return"bad";
+  var span=p.hi-p.lo, m=span*0.08;
+  if(p.k==="do"){return v<p.lo+1?"warn":"ok"}
+  return(v>p.hi-m||v<p.lo+m&&p.lo>0)?"warn":"ok";
+}
+var LABEL={ok:"Safe",warn:"Watch",bad:"Alert"};
+var COLORVAR={ok:"--ok",warn:"--warn",bad:"--bad"};
+function fmt(p,v){return v.toFixed(p.dec)}
+function cur(){return document.getElementById("st").value}
+
+// ---- Simulation step ----
+function step(){
+  if(mode==="csv"){stepCsv();return}
+  if(mode==="ts"){check(cur());render();return}
+  var s=cur();
+  STATIONS.forEach(function(name){
+    PARAMS.forEach(function(p){
+      var a=data[name][p.k],last=a[a.length-1];
+      var next=last+(p.base-last)*0.1+(Math.random()-.5)*p.noise*2;
+      if(spillLeft[name]>0)next+=impact(p.k,spillType[name]);
+      a.push(next);if(a.length>HIST)a.shift();
+    });
+    if(spillLeft[name]>0)spillLeft[name]--;
+  });
+  tick++;
+  check(s);render();
+}
+var lastState={};
+function check(s){
+  PARAMS.forEach(function(p){
+    var a=data[s][p.k],v=a[a.length-1],st=status(p,v),key=s+p.k;
+    if(st==="bad"&&lastState[key]!=="bad"){
+      var li=document.createElement("li");
+      li.innerHTML='<b class="t-bad">ALERT</b> '+s+': '+p.n+' = '+fmt(p,v)+' '+p.u+' is outside the limit ('+p.lo+' to '+p.hi+'). Reading '+tick+'.';
+      var log=document.getElementById("log");
+      if(log.firstChild&&log.firstChild.textContent==="No alerts yet.")log.innerHTML="";
+      log.insertBefore(li,log.firstChild);beep();
+    }
+    lastState[key]=st;
+  });
+}
+
+// ---- Rendering ----
+function render(){
+  var s=cur(),worst="ok",html="";
+  PARAMS.forEach(function(p){
+    var a=data[s][p.k],v=a[a.length-1],st=status(p,v);
+    if(st==="bad")worst="bad";else if(st==="warn"&&worst!=="bad")worst="warn";
+    html+='<button class="card '+st+(p.k===sel?' sel':'')+'" data-k="'+p.k+'"><div class="n">'+p.n+'</div><div class="v">'+fmt(p,v)+' <small>'+p.u+'</small></div><div class="r">Limit: '+p.lo+' to '+p.hi+' · <b class="t-'+st+'">'+LABEL[st]+'</b></div></button>';
+  });
+  document.getElementById("cards").innerHTML=html;
+  var o=document.getElementById("overall");
+  o.textContent="Overall: "+LABEL[worst];
+  o.style.background="var("+COLORVAR[worst]+")";
+  drawChart(s);extras(s,worst);
+}
+function drawChart(s){
+  var p=PARAMS.filter(function(x){return x.k===sel})[0],a=data[s][sel];
+  document.getElementById("ct").textContent=p.n+" - last "+HIST+" readings at "+s;
+  var W=700,H=220,L=44,R=10,T=10,B=24;
+  var mn=Math.min.apply(null,a.concat([p.lo])),mx=Math.max.apply(null,a.concat([p.hi]));
+  if(p.k==="do"||p.k==="tp"){mx=Math.max.apply(null,a)+1}
+  if(p.k==="tb"||p.k==="tds")mn=0;
+  var pad=(mx-mn)*.08;mn-=pad;mx+=pad;
+  function X(i){return L+i*(W-L-R)/(HIST-1)}
+  function Y(v){return T+(H-T-B)*(1-(v-mn)/(mx-mn))}
+  var g="";
+  for(var i=0;i<=4;i++){var val=mn+(mx-mn)*i/4,y=Y(val);
+    g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="var(--mute)">'+val.toFixed(p.dec>1?0:1)+'</text>';}
+  [p.lo,p.hi].forEach(function(l){if(l>mn&&l<mx&&!(l===0)){g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(l)+'" y2="'+Y(l)+'" stroke="var(--bad)" stroke-dasharray="5 4"/>'}});
+  var pts=a.map(function(v,i){return X(i)+","+Y(v)}).join(" ");
+  g+='<polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="'+pts+'"/>';
+  var lv=a[a.length-1];
+  g+='<circle cx="'+X(HIST-1)+'" cy="'+Y(lv)+'" r="5" fill="var(--'+(status(p,lv)==="ok"?"ok":status(p,lv)==="warn"?"warn":"bad")+')"/>';
+  g+='<text x="'+L+'" y="'+(H-6)+'" font-size="11" fill="var(--mute)">older</text><text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end" font-size="11" fill="var(--mute)">latest (dashed red = limit)</text>';
+  document.getElementById("chart").innerHTML=g;
+}
+
+// ---- Events ----
+var sel_el=document.getElementById("st");
+STATIONS.forEach(function(s){var o=document.createElement("option");o.textContent=s;sel_el.appendChild(o)});
+sel_el.value=STATIONS[1];
+sel_el.addEventListener("change",render);
+document.getElementById("cards").addEventListener("click",function(e){
+  var c=e.target.closest(".card");if(c){sel=c.getAttribute("data-k");render()}
+});
+document.getElementById("spill").addEventListener("click",function(){spillLeft[cur()]=8;spillType[cur()]=document.getElementById("stype").value});
+document.getElementById("pause").addEventListener("click",function(){
+  paused=!paused;this.textContent=paused?"Resume":"Pause";
+});
+
+// ---- Explainer animation ----
+(function(){
+var C=[
+["i","THE PROBLEM","Rivers under pressure","Many rivers receive waste from cities, industry and farms. Spotting pollution quickly is the hard part."],
+["m","SOURCE","Pollution enters the river","Untreated discharge changes the water: pH can shift, oxygen drops and the water becomes cloudy."],
+["e","OLD METHOD","Manual sampling","Collecting bottles by hand and testing them in a lab is slow and covers only a few places and times."],
+["m","SENSING","IoT sensor in the water","A floating sensor measures pH, dissolved oxygen, turbidity, TDS and temperature around the clock."],
+["m","DATA","Data travels wirelessly","Readings are sent through a network to the cloud and then to a live dashboard."],
+["i","ANALYSIS","The dashboard checks limits","Each reading is compared with standard limits. Charts, forecasts and a quality score show what is changing."],
+["e","ALERT","Early warning","When a value crosses its limit, an alert goes to the authorities so the source can be traced quickly."],
+["s","RESULT","Cleaner rivers, safer water","Early detection helps protect people, fish and farms. Smart monitoring supports faster action."]];
+var RV=["#3a9fb8","#6b5a2e","#6b5a2e","#6b5a2e","#6b5a2e","#6b5a2e","#6b5a2e","#3a9fb8"],SL=6000,N=C.length,TOT=SL*N,t=0,play=true,vis=true,sc=-1,sp=1,voice=false,segs=[];
+var $=function(i){return document.getElementById(i)},sg=$("segs1");
+for(var q=0;q<N;q++){(function(i){var d=document.createElement("div");d.className="seg";d.innerHTML="<i></i>";d.addEventListener("click",function(){t=i*SL;sc=-1;ui()});sg.appendChild(d);segs.push(d.firstChild)})(q)}
+function say(x){try{speechSynthesis.cancel();if(voice&&play)speechSynthesis.speak(new SpeechSynthesisUtterance(x))}catch(e){}}
+function mm(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+function ui(){
+  var n=Math.min(N-1,Math.floor(t/SL));
+  if(n!==sc){sc=n;var c=C[n],ch=$("chip1");
+    ch.textContent=c[1];ch.className="chip "+c[0];
+    $("cap").innerHTML='<b style="display:block;font-size:.66rem;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:2px">'+c[2]+'</b>'+c[3].split(" ").map(function(w,i){return'<span class="w" style="animation-delay:'+(i*0.09)+'s">'+w+" </span>"}).join("");
+    $("river").setAttribute("fill",RV[n]);
+    document.querySelectorAll("#vid [data-sc]").forEach(function(e){e.style.opacity=(" "+e.getAttribute("data-sc")+" ").indexOf(" "+n+" ")>-1?1:0});
+    say(c[2]+". "+c[3]);}
+  segs.forEach(function(el,i){el.style.width=Math.max(0,Math.min(1,(t-i*SL)/SL))*100+"%"});
+  $("tm1").textContent=mm(t)+" / "+mm(TOT);
+}
+ui();
+setInterval(function(){if(!play||!vis)return;t+=100*sp;if(t>=TOT)t=0;ui()},100);
+if(window.IntersectionObserver)new IntersectionObserver(function(e){vis=e[0].isIntersecting},{threshold:.2}).observe($("pl1"));
+$("vp").addEventListener("click",function(){play=!play;this.textContent=play?"❚❚":"▶";if(!play){try{speechSynthesis.cancel()}catch(e){}}else{var c=C[sc];say(c[2]+". "+c[3])}});
+$("vr").addEventListener("click",function(){t=0;play=true;$("vp").textContent="❚❚";sc=-1;ui()});
+$("vx").addEventListener("change",function(){sp=+this.value});
+$("vv").addEventListener("click",function(){voice=!voice;this.textContent=voice?"🔊 Voice":"🔇 Voice";if(voice){var c=C[sc];say(c[2]+". "+c[3])}else{try{speechSynthesis.cancel()}catch(e){}}});
+$("vf").addEventListener("click",function(){var e=$("pl1");try{if(document.fullscreenElement)document.exitFullscreen();else e.requestFullscreen()}catch(x){}});
+var rv=$("rv");rv.addEventListener("loadeddata",function(){rv.hidden=false});rv.src="water-pollution.mp4";
+})();
+
+// ---- More advanced features ----
+var spillType={};
+var IMP={sewage:{do:-.9,tb:1.4,tds:25,ph:-.1,tp:.1},industrial:{ph:-.45,tds:70,do:-.3,tb:.4,tp:.3},agri:{tb:1,tds:30,do:-.5,ph:.12,tp:0}};
+function impact(k,t){return((IMP[t]||IMP.sewage)[k]||0)}
+function beep(){
+  if(!document.getElementById("snd").checked)return;
+  try{var c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();
+  o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.25)}catch(e){}
+}
+function slope(a){
+  var n=Math.min(12,a.length),y=a.slice(-n),mx=(n-1)/2,my=y.reduce(function(x,z){return x+z},0)/n,num=0,den=0;
+  y.forEach(function(v,i){num+=(i-mx)*(v-my);den+=(i-mx)*(i-mx)});return num/den;
+}
+function more(s){
+  var out=[],bad={};
+  PARAMS.forEach(function(p){
+    var a=data[s][p.k],v=a[a.length-1],m=slope(a);bad[p.k]=status(p,v)==="bad";
+    var hit=0;for(var k=1;k<=15;k++){var f=v+m*k;if(f<p.lo||f>p.hi){hit=k;break}}
+    var dir=Math.abs(m)<p.noise*.08?"stable":(m>0?"rising":"falling");
+    var t=p.n+": "+dir;
+    if(hit&&status(p,v)!=="bad")t+=' - <b class="t-warn">forecast to cross its limit in about '+hit+' readings</b>';
+    out.push("<li>"+t+"</li>");
+  });
+  var dx;
+  if(bad.do&&bad.tb)dx="Pattern looks like <b>organic / sewage load</b> (oxygen used up while turbidity rises).";
+  else if(bad.ph&&bad.tds)dx="Pattern looks like <b>industrial effluent</b> (pH shift with high dissolved solids).";
+  else if(bad.tb&&!bad.ph)dx="Pattern looks like <b>soil or agricultural runoff</b> (turbidity high, pH normal).";
+  else if(bad.ph||bad.do||bad.tb||bad.tds)dx="A parameter is out of limits. Check the sensor and the nearby discharge points.";
+  else dx="No anomaly detected right now.";
+  document.getElementById("ins").innerHTML="<p><b>Diagnosis:</b> "+dx+'</p><ul>'+out.join("")+"</ul><p class='sub' style='font-size:.8rem'>Forecast uses a simple linear trend on the last 12 readings. Diagnosis is simple rule logic for demonstration, not a certified analysis.</p>";
+  var h="<table><tr><th>Station</th>"+PARAMS.map(function(p){return"<th>"+p.n+"</th>"}).join("")+"</tr>";
+  STATIONS.forEach(function(n){h+="<tr><td>"+n+"</td>"+PARAMS.map(function(p){var a=data[n][p.k],v=a[a.length-1];return'<td class="t-'+status(p,v)+'"><b>'+fmt(p,v)+"</b></td>"}).join("")+"</tr>"});
+  document.getElementById("cmp").innerHTML=h+"</table>";
+}
+
+function std(s){
+  document.querySelectorAll(".lv").forEach(function(td){
+    var p=PARAMS.filter(function(x){return x.k===td.getAttribute("data-k")})[0],a=data[s][p.k],v=a[a.length-1],st=status(p,v);
+    td.innerHTML='<b class="t-'+st+'">'+fmt(p,v)+" "+p.u+"</b> - "+LABEL[st];
+  });
+}
+// ---- Advanced extras ----
+var SC={ok:100,warn:60,bad:15},GC={ok:"--ok",warn:"--warn",bad:"--bad"};
+function extras(s,worst){
+  var tot=0;
+  PARAMS.forEach(function(p){var a=data[s][p.k];tot+=SC[status(p,a[a.length-1])]});
+  var q=Math.round(tot/PARAMS.length),st=q>=80?"ok":q>=50?"warn":"bad";
+  document.getElementById("wr").setAttribute("stroke-dasharray",(q*3.02)+" 302");
+  document.getElementById("wr").setAttribute("stroke","var("+GC[st]+")");
+  document.getElementById("wn").textContent=q;
+  document.getElementById("wl").textContent=st==="ok"?"Good":st==="warn"?"Moderate":"Poor";
+  document.body.classList.toggle("polluted",worst==="bad");more(s);std(s);
+  document.querySelectorAll(".card").forEach(function(c){
+    var a=data[s][c.getAttribute("data-k")],mn=Math.min.apply(null,a),mx=Math.max.apply(null,a),r=(mx-mn)||1;
+    var pts=a.map(function(v,i){return(i*100/(a.length-1)).toFixed(1)+","+(26-(v-mn)/r*24).toFixed(1)}).join(" ");
+    c.insertAdjacentHTML("beforeend",'<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points="'+pts+'"/></svg>');
+  });
+}
+function clk(){document.getElementById("clock").textContent=new Date().toLocaleTimeString()}
+clk();setInterval(clk,1000);
+document.getElementById("csv").addEventListener("click",function(){
+  var s=cur(),rows=["reading,"+PARAMS.map(function(p){return p.n}).join(",")];
+  for(var i=0;i<HIST;i++)rows.push((i+1)+","+PARAMS.map(function(p){return data[s][p.k][i].toFixed(2)}).join(","));
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+  a.download=(mode==="sim"?"water-data-simulated.csv":"water-data-real.csv");a.click();
+});
+
+// ---- Sidebar logic ----
+var bd=document.body;
+function sb(o){bd.classList.toggle("sb",o);document.getElementById("tg").textContent=o?"✕ Close guide":"☰ Topic guide"}
+document.getElementById("tg").addEventListener("click",function(){sb(!bd.classList.contains("sb"))});
+if(window.innerWidth>=800)sb(true);
+document.getElementById("cards").addEventListener("click",function(e){
+  var c=e.target.closest(".card");if(!c)return;
+  var d=document.getElementById("p-"+c.getAttribute("data-k"));
+  if(d){var par=d.parentElement;if(par.tagName==="DETAILS")par.open=true;d.open=true;sb(true);d.scrollIntoView({block:"nearest"})}
+});
+document.addEventListener("click",function(e){
+  if(!bd.classList.contains("sb"))return;
+  if(e.target.closest("#side,#tg,#ts,button,a,input,select,label,.card,.player"))return;
+  sb(false);
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&bd.classList.contains("sb"))sb(false)});
+document.getElementById("sq").addEventListener("input",function(){
+  var q=this.value.toLowerCase().trim();
+  document.querySelectorAll("#side > details").forEach(function(d){
+    var m=!q||d.textContent.toLowerCase().indexOf(q)>-1;d.style.display=m?"":"none";if(q&&m)d.open=true;
+  });
+});
+
+
+// ---- Theme switch ----
+function setTheme(m){document.documentElement.setAttribute("data-theme",m);document.getElementById("ts").setAttribute("aria-checked",m==="dark")}
+document.getElementById("ts").addEventListener("click",function(){
+  setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark")});
+setTheme(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+// ---- Video 2 player ----
+var V=[
+["INTRO","a","India's rivers are lifelines","Rivers give drinking water, food, farming and livelihoods to millions of people."],
+["CAUSE","e","Where pollution comes from","Industrial effluent, untreated sewage and farm runoff flow into rivers every day."],
+["EFFECT","e","Aquatic life under threat","Toxic waste and falling oxygen kill fish and damage the whole food chain."],
+["EFFECT","e","Algae bloom","Extra nutrients make algae grow. It blocks sunlight and uses up oxygen as it decays."],
+["EFFECT","e","Risk to human health","Polluted water spreads diarrhoea, cholera and typhoid, and raises treatment costs."],
+["MONITOR","a","Sensors watch the river","IoT sensors measure pH, dissolved oxygen, turbidity, TDS and temperature and send the data wirelessly."],
+["ALERT","e","Early warning","The dashboard compares readings with limits, forecasts the trend and raises an alert."],
+["SOLUTION","s","Treat before discharge","Sewage and effluent treatment plants clean wastewater before it reaches the river."],
+["SOLUTION","s","Nature helps","Wetlands, trees and reeds on the banks filter pollutants and restore habitats."],
+["RULES","s","Rules and inspection","Strict discharge limits, regular inspection and real-time checks make polluters accountable."],
+["ACT","s","Every drop counts","Monitoring, awareness and responsible choices keep rivers clean for everyone."],
+["CONCLUSION","a","Save water. Save life.","Clean rivers need industry, government, technology and you. Every drop counts."]];
+var RV2=["#3a9fb8","#7a6a3c","#7a6a3c","#5b7a3a","#7a6a3c","#7a6a3c","#7a6a3c","#5a97a8","#46a3b8","#3f9fb8","#3a9fb8","#3a9fb8"],SL=6000,N=V.length,TOT=SL*N,t2=0,p2=true,sc2=-1,sp2=1,voice=false,segs=[];
+var sg=document.getElementById("segs");
+for(var q=0;q<N;q++){(function(i){var d=document.createElement("div");d.className="seg";d.innerHTML="<i></i>";d.addEventListener("click",function(){t2=i*SL;sc2=-1;ui()});sg.appendChild(d);segs.push(d.firstChild)})(q)}
+function speak(t){try{speechSynthesis.cancel();if(voice&&p2)speechSynthesis.speak(new SpeechSynthesisUtterance(t))}catch(e){}}
+function mm(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+function ui(){
+  var n=Math.min(N-1,Math.floor(t2/SL));
+  if(n!==sc2){sc2=n;
+    document.getElementById("cap2").innerHTML="<b>"+V[n][2]+"</b>"+V[n][3].split(" ").map(function(w,i){return'<span class="w" style="animation-delay:'+(i*0.09)+'s">'+w+" </span>"}).join("");
+    var ch=document.getElementById("chip");ch.textContent=V[n][0];ch.className="chip "+V[n][1];
+    document.getElementById("river2").setAttribute("fill",RV2[n]);
+    document.querySelectorAll("#vid2 [data-on]").forEach(function(e){e.style.opacity=(" "+e.getAttribute("data-on")+" ").indexOf(" "+n+" ")>-1?1:0});
+    speak(V[n][2]+". "+V[n][3]);}
+  segs.forEach(function(el,i){el.style.width=Math.max(0,Math.min(1,(t2-i*SL)/SL))*100+"%"});
+  document.getElementById("tm").textContent=mm(t2)+" / "+mm(TOT);
+}
+ui();
+setInterval(function(){if(!p2)return;t2+=100*sp2;if(t2>=TOT)t2=0;ui()},100);
+document.getElementById("v2p").addEventListener("click",function(){p2=!p2;this.textContent=p2?"❚❚":"▶";if(!p2){try{speechSynthesis.cancel()}catch(e){}}else speak(V[sc2][2]+". "+V[sc2][3])});
+document.getElementById("v2r").addEventListener("click",function(){t2=0;p2=true;document.getElementById("v2p").textContent="❚❚";sc2=-1;ui()});
+document.getElementById("v2x").addEventListener("change",function(){sp2=+this.value});
+document.getElementById("v2v").addEventListener("click",function(){voice=!voice;this.textContent=voice?"🔊 Voice":"🔇 Voice";if(voice)speak(V[sc2][2]+". "+V[sc2][3]);else{try{speechSynthesis.cancel()}catch(e){}}});
+document.getElementById("v2f").addEventListener("click",function(){var e=document.getElementById("pl");try{if(document.fullscreenElement)document.exitFullscreen();else e.requestFullscreen()}catch(x){}});
+document.getElementById("v2h").addEventListener("click",function(){
+  var b=document.getElementById("v2body"),h=b.style.display==="none";b.style.display=h?"":"none";this.textContent=h?"Hide video":"Show video";
+  if(!h){p2=false;document.getElementById("v2p").textContent="▶";try{speechSynthesis.cancel()}catch(e){}}
+});
+
+
+// ---- Background bubbles ----
+(function(){var bg=document.querySelector(".bg");for(var i=0;i<16;i++){var b=document.createElement("span"),z=6+Math.random()*16;b.className="bub";
+b.style.cssText="width:"+z+"px;height:"+z+"px;left:"+(Math.random()*100)+"%;animation-duration:"+(12+Math.random()*16)+"s;animation-delay:-"+(Math.random()*20)+"s";bg.appendChild(b)}})();
+
+// ---- Advanced quiz ----
+var QB=[
+["Which parameter shows how acidic or alkaline water is?",["pH","TDS","Turbidity","Temperature"],0,"pH measures acidity or alkalinity. A sudden shift can point to industrial discharge."],
+["Low dissolved oxygen in a river usually signals what?",["Heavy organic pollution such as sewage","Very clean water","Only cold weather","Too many fish"],0,"Organic waste uses up oxygen as it decomposes."],
+["Which national body monitors water quality and sets standards in India?",["CPCB","SEBI","RBI","ISRO"],0,"The Central Pollution Control Board (CPCB) works with State Pollution Control Boards."],
+["Cloudiness of water caused by suspended particles is called?",["Turbidity","Salinity","Alkalinity","Hardness"],0,"Turbidity is measured in NTU."],
+["Which of these is a major source of water pollution?",["Untreated sewage","Rainfall","Sunlight","Fresh breeze"],0,"Untreated or partly treated sewage is a major source."],
+["Excess fertilizer nutrients in water mainly cause what?",["Algae bloom (eutrophication)","Clearer water","More oxygen","Lower TDS"],0,"Algae blooms block sunlight and use up oxygen."],
+["What does TDS stand for?",["Total Dissolved Solids","Total Dirt Sensor","Temperature Data System","Toxic Disposal Standard"],0,"TDS is the amount of dissolved salts and minerals."],
+["What do IoT sensors do in this project?",["Measure water quality and send data continuously","Cook food","Print reports","Store ice"],0,"Sensors give continuous, near real-time readings."],
+["Warm water holds how much oxygen compared with cold water?",["Less","More","The same","None at all"],0,"Hot discharge can lower oxygen and stress aquatic life."],
+["Which disease can spread through polluted water?",["Cholera","Fracture","Diabetes","Asthma"],0,"Cholera, typhoid and diarrhoea are waterborne diseases."],
+["Namami Gange is a programme related to what?",["Cleaning and rejuvenating the Ganga","Space research","Road building","Banking reform"],0,"It is run under the National Mission for Clean Ganga."],
+["What pH range does BIS IS 10500 give for drinking water?",["6.5 to 8.5","1 to 5","9 to 12","2 to 4"],0,"The acceptable range is 6.5 to 8.5."],
+["Which technology uses satellites to track algae and turbidity over large areas?",["Remote sensing","Barcode scanning","3D printing","Bluetooth pairing"],0,"Remote sensing covers large areas that manual sampling cannot."],
+["Which of these is a remediation (solution) measure?",["Sewage treatment plants","Dumping waste in rivers","Burning plastic","Releasing untreated effluent"],0,"Treating sewage and effluent before discharge cleans water at the source."],
+["Which UN Sustainable Development Goal is about clean water and sanitation?",["SDG 6","SDG 1","SDG 13","SDG 15"],0,"SDG 6 is Clean Water and Sanitation."],
+["In this project's insight logic, a pH shift with high TDS suggests what?",["Industrial effluent","Clean spring water","Snow melt","A healthy river"],0,"The dashboard's rule-based logic links pH shift plus high TDS to industrial effluent."],
+["What is the BIS acceptable limit for turbidity in drinking water?",["1 NTU","20 NTU","50 NTU","100 NTU"],0,"1 NTU is acceptable, and up to 5 NTU is permissible."],
+["What is the BIS acceptable limit for TDS in drinking water?",["500 mg/L","50 mg/L","5000 mg/L","50000 mg/L"],0,"500 mg/L is acceptable, and up to 2000 mg/L is permissible if no better source exists."],
+["CPCB Class A water is meant for which use?",["Drinking source after disinfection","Only industrial cooling","Only irrigation","Only waste disposal"],0,"Class A is a drinking water source (after disinfection)."],
+["Why is digital monitoring better than only manual sampling?",["It gives continuous, near real-time data","It needs no sensors","It is always slower","It covers fewer places"],0,"Continuous data helps catch pollution events early."],
+["How do wetlands and riverbank plants help a river?",["They filter pollutants and support life","They add plastic","They remove all oxygen","They heat the water"],0,"Wetlands trap sediment and nutrients and restore habitats."],
+["What does the alert system in this dashboard do?",["Compares readings with limits and warns","Cleans the river by itself","Predicts the weather","Sells water"],0,"Each reading is checked against its limit and an alert is logged."]
+];
+var qs=[],qi=0,qsc=0,qa=false,qbest=-1,qbox=document.getElementById("qbox");
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function qHome(){qbox.innerHTML='<p>Test what you learned about water pollution and this project.'+(qbest>=0?' Best this session: <b>'+qbest+'/10</b>.':'')+'</p><button id="qgo" class="qo ok">Start quiz</button>'}
+function qStart(){qs=shuf(QB).slice(0,10).map(function(x){return{q:x[0],o:shuf(x[1].map(function(t,i){return{t:t,c:i===x[2]}})),e:x[3],sel:-1}});qi=0;qShow()}
+function qShow(){
+  var q=qs[qi],ans=q.sel>=0,done=qs.filter(function(x){return x.sel>=0}).length;
+  var pal=qs.map(function(x,i){return'<button class="pb'+(x.sel<0?'':x.o[x.sel].c?' ok':' no')+(i===qi?' cur':'')+'" data-p="'+i+'" aria-label="Go to question '+(i+1)+'">'+(i+1)+'</button>'}).join("");
+  var opts=q.o.map(function(o,i){var c="qo";if(ans){if(o.c)c+=" ok";else if(i===q.sel)c+=" no"}return'<button class="'+c+'" data-i="'+i+'"'+(ans?" disabled":"")+'>'+o.t+'</button>'}).join("");
+  qbox.innerHTML='<div class="qh"><span>Question '+(qi+1)+' of 10</span><span>Answered: '+done+'/10</span></div><div class="qbar"><i style="width:'+(done*10)+'%"></i></div><div class="qp">'+pal+'</div><p class="qq">'+q.q+'</p>'+opts+'<p class="qf">'+(ans?(q.o[q.sel].c?"✅ <b>Correct!</b> ":"❌ <b>Wrong.</b> ")+q.e:"")+'</p><div class="qnav"><button id="qprev"'+(qi===0?" disabled":"")+'>◀ Previous</button>'+(qi===9?'<button id="qsub" class="pri">Submit</button>':'<button id="qnext" class="pri">'+(ans?"Next ▶":"Skip ▶")+'</button>')+'</div>';
+}
+function qEnd(){
+  var sc=qs.filter(function(x){return x.sel>=0&&x.o[x.sel].c}).length,un=qs.filter(function(x){return x.sel<0}).length;
+  if(sc>qbest)qbest=sc;
+  var r=sc===10?["🏆","Water Champion! Perfect score."]:sc>=8?["🌟","Excellent! You know your water pollution."]:sc>=6?["👍","Good job! A little more revision and you are there."]:sc>=4?["🙂","Fair. Read the topic guide again and retry."]:["📚","Needs practice. Go through the topic guide and try again."];
+  var st=Math.round(sc/2),stars="★".repeat(st)+"☆".repeat(5-st);
+  qbox.innerHTML='<div class="qres"><div class="em">'+r[0]+'</div><div class="sc">'+sc+' / 10</div><div class="stars" aria-label="'+st+' out of 5 stars">'+stars+'</div><p><b>'+r[1]+'</b></p><p class="note">'+(sc*10)+'% correct'+(un?' · '+un+' unanswered':'')+' · Best this session: '+qbest+'/10</p><button id="qgo" class="qo ok">Play again</button></div>';
+}
+qbox.addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t)return;
+  if(t.id==="qgo"){qStart();return}
+  if(t.id==="qprev"){qi--;qShow();return}
+  if(t.id==="qnext"){qi++;qShow();return}
+  if(t.id==="qsub"){qEnd();return}
+  if(t.hasAttribute("data-p")){qi=+t.getAttribute("data-p");qShow();return}
+  if(t.hasAttribute("data-i")&&qs[qi].sel<0){qs[qi].sel=+t.getAttribute("data-i");qShow()}
+});
+qHome();
+
+// ---- Real data ----
+var mode="sim",RS={},FND={},ptr=0,tsTimer=null;
+function msg(t){document.getElementById("dsmsg").innerHTML=t}
+function applyReal(src,label,series,found,fromStart){
+  mode=src;RS=series;FND=found;
+  STATIONS.length=0;Object.keys(series).slice(0,6).forEach(function(n){STATIONS.push(n)});
+  data={};
+  STATIONS.forEach(function(n){spillLeft[n]=0;spillType[n]="sewage";data[n]={};
+    PARAMS.forEach(function(p){
+      var a=found[p.k]?(fromStart?series[n][p.k].slice(0,HIST):series[n][p.k].slice(-HIST)):[];
+      var fill=a.length?a[0]:null;
+      while(a.length<HIST)a.unshift(fill!==null?fill:p.base+(Math.random()-.5)*p.noise*2);
+      data[n][p.k]=a});});
+  ptr=HIST;lastState={};
+  var se=document.getElementById("st");se.innerHTML="";
+  STATIONS.forEach(function(n){var o=document.createElement("option");o.textContent=n;se.appendChild(o)});
+  se.value=STATIONS[0];
+  document.getElementById("dsbanner").innerHTML="Showing <b>real data</b>: "+label+". Cite the source in your report.";
+  document.getElementById("livelbl").textContent=src==="csv"?"REAL DATA (file replay)":"REAL DATA (ThingSpeak)";
+  document.getElementById("spill").disabled=true;
+  var miss=PARAMS.filter(function(p){return!found[p.k]}).map(function(p){return p.n});
+  msg("Loaded: "+label+"."+(miss.length?' <b class="t-warn">Not found in your data, so these stay simulated: '+miss.join(", ")+".</b>":" All five parameters found."));
+  render();
+}
+var CF={ph:/(^|[^a-z])ph([^a-z]|$)/,do:/oxygen|(^|[^a-z])do([^a-z]|$)/,tb:/turb/,tds:/tds|dissolved[ _-]*solid/,tp:/temp/},SF=/station|location|site|river|place/;
+function parseCSV(t){
+  var L=t.replace(/^\uFEFF/,"").trim().split(/\r?\n/),d=(L[0].indexOf(";")>-1&&L[0].indexOf(",")<0)?";":",";
+  function sp(l){return l.split(d).map(function(c){return c.trim().replace(/^"|"$/g,"")})}
+  var H=sp(L[0]).map(function(h){return h.toLowerCase()}),idx={},si=-1;
+  PARAMS.forEach(function(p){H.forEach(function(h,i){if(idx[p.k]===undefined&&CF[p.k].test(h))idx[p.k]=i})});
+  H.forEach(function(h,i){if(si<0&&SF.test(h))si=i});
+  var series={},found={},cnt=0,mg={};PARAMS.forEach(function(p){mg[p.k]=[]});
+  L.slice(1).forEach(function(l){
+    var c=sp(l),n=si>=0&&c[si]?c[si]:"Uploaded data";
+    if(!series[n]){series[n]={};PARAMS.forEach(function(p){series[n][p.k]=[]})}
+    PARAMS.forEach(function(p){if(idx[p.k]!==undefined){var v=parseFloat(c[idx[p.k]]);if(!isNaN(v)){series[n][p.k].push(v);mg[p.k].push(v);found[p.k]=true}}});cnt++;
+  });
+  var mx=0;Object.keys(series).forEach(function(n){PARAMS.forEach(function(p){mx=Math.max(mx,series[n][p.k].length)})});
+  if(mx<3&&Object.keys(series).length>1)series={"All stations (one row at a time)":mg};
+  return{series:series,found:found,rows:cnt};
+}
+function stepCsv(){
+  STATIONS.forEach(function(n){PARAMS.forEach(function(p){
+    var a=data[n][p.k],v;
+    if(FND[p.k]&&RS[n]&&RS[n][p.k].length){var r=RS[n][p.k];v=r[ptr%r.length]}
+    else v=a[a.length-1]+(p.base-a[a.length-1])*.1+(Math.random()-.5)*p.noise*2;
+    a.push(v);if(a.length>HIST)a.shift()})});
+  ptr++;tick++;check(cur());render();
+}
+document.getElementById("csvf").addEventListener("change",function(){
+  var f=this.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var o=parseCSV(r.result);
+    if(!Object.keys(o.found).length){msg('<b class="t-bad">No pH, oxygen, turbidity, TDS or temperature columns found. Check the column names.</b>');return}
+    applyReal("csv",f.name+" ("+o.rows+" rows, replayed one row at a time)",o.series,o.found,true)}catch(e){msg('<b class="t-bad">Could not read this file.</b>')}};
+  r.readAsText(f);
+});
+function tsLoad(id,key){
+  var u="https://api.thingspeak.com/channels/"+encodeURIComponent(id)+"/feeds.json?results=40"+(key?"&api_key="+encodeURIComponent(key):"");
+  return fetch(u).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(j){
+    var fd=j.feeds||[],ch=j.channel||{},map={},ser={},fo={},n="ThingSpeak channel "+id;
+    PARAMS.forEach(function(p){for(var i=1;i<=8;i++){var nm=(ch["field"+i]||"").toLowerCase();if(nm&&!/volt|raw/.test(nm)&&CF[p.k].test(nm)){map[p.k]=i;break}}});
+    if(!Object.keys(map).length)throw new Error("no field names matched pH, TDS, turbidity, temperature or oxygen");
+    ser[n]={};
+    PARAMS.forEach(function(p){var a=map[p.k]?fd.map(function(x){return parseFloat(x["field"+map[p.k]])}).filter(function(v){return!isNaN(v)}):[];ser[n][p.k]=a;if(a.length>2)fo[p.k]=true});
+    if(!Object.keys(fo).length)throw new Error("matched fields have no numeric data");
+    if(mode!=="ts")applyReal("ts",'ThingSpeak channel <a href="https://thingspeak.com/channels/'+id+'" target="_blank" rel="noopener noreferrer">'+id+'</a>'+(ch.name?' "'+ch.name+'"':"")+(ch.latitude&&+ch.latitude?" (lat "+ch.latitude+", long "+ch.longitude+")":"")+", refreshes every 15 s",ser,fo,false);
+    else PARAMS.forEach(function(p){if(fo[p.k])data[n][p.k]=ser[n][p.k].slice(-HIST)});
+  });
+}
+document.getElementById("tsgo").addEventListener("click",function(){
+  var id=document.getElementById("tsid").value.trim(),key=document.getElementById("tskey").value.trim();
+  if(!id){msg('<b class="t-warn">Enter a channel ID.</b>');return}
+  msg("Loading...");mode="sim";clearInterval(tsTimer);
+  tsLoad(id,key).then(function(){tsTimer=setInterval(function(){tsLoad(id,key).catch(function(){})},15000)}).catch(function(e){msg('<b class="t-bad">Could not load: '+e.message+'.</b> Check the channel ID or key, or whether the channel is public. Browsers can block this when the page is opened from some places.')});
+});
+document.getElementById("tspick").addEventListener("change",function(){if(this.value)document.getElementById("tsid").value=this.value});
+document.getElementById("back").addEventListener("click",function(){location.reload()});
+document.getElementById("smp").addEventListener("click",function(){
+  var rows=["station,pH,dissolved_oxygen,turbidity,tds,temperature","Sample A,7.4,7.1,2.4,310,26.1","Sample A,7.3,7.0,2.6,320,26.2","Sample A,7.5,6.9,2.5,315,26.0"];
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));a.download="sample-format.csv";a.click();
+});
+render();
+setInterval(function(){if(!paused)step()},1500);
+</script>
+
+
+</body></html>
